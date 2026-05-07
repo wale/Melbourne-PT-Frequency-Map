@@ -43,7 +43,6 @@
   }
   .map-container.panning { cursor: grabbing; }
 
-  /* Zoom buttons */
   .zoom-controls {
     position: absolute;
     bottom: 12px;
@@ -83,13 +82,11 @@
 
   #map-svg-wrapper svg {
     width: 100%;
-    display: block;
-    /* NO CSS transform — zoom is done via viewBox */
     height: auto;
     display: block;
+    /* zoom via viewBox — no CSS transform, no rasterisation */
   }
 
-  /* Legend toggle button */
   .legend-btn {
     position: absolute;
     top: 10px;
@@ -115,7 +112,6 @@
   .legend-btn .arrow { transition: transform 0.18s; }
   .legend-btn.open .arrow { transform: rotate(180deg); }
 
-  /* Dropdown panel */
   .legend-panel {
     position: absolute;
     top: 44px;
@@ -184,10 +180,10 @@
     flex-shrink: 0;
   }
 
-  .swatch-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  .swatch-square {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
     flex-shrink: 0;
   }
 
@@ -211,22 +207,6 @@
     color: #888;
     font-size: 14px;
   }
-
-  .show-original-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    padding: 0;
-    background: none;
-    border: none;
-    font-size: 11px;
-    color: #666;
-    cursor: pointer;
-    font-family: Arial, Helvetica, sans-serif;
-    text-decoration: underline;
-  }
-  .show-original-btn:hover { color: #333; }
 </style>
 </head>
 <body>
@@ -239,7 +219,6 @@
     <div class="loading">Loading map…</div>
   </div>
 
-  <!-- Legend -->
   <button class="legend-btn" id="legendBtn" aria-expanded="false" aria-controls="legendPanel">
     <svg width="13" height="11" viewBox="0 0 13 11" fill="none">
       <rect x="0" y="0" width="7" height="2" rx="1" fill="#555"/>
@@ -259,42 +238,109 @@
     <p class="legend-section-title">Bus frequency</p>
 
     <!--
-      data-layers: comma-separated layer IDs to toggle.
-      Bus route lines + their matching route-label circles + station markers + train lines of same freq.
+      data-layers uses Inkscape label names, not IDs.
+      Format: "Parent Label > Child Label" for nested layers,
+              or bare "Label" for top-level layers.
+      The JS resolves these via inkscape:label attributes after SVG load,
+      so renaming a layer in Inkscape + updating the name here is all that's needed.
     -->
-    <label class="legend-row" data-layers="layer3,layer5,layer40,layer74,layer60,layer49,layer67,layer27,g9425">
+
+    <label class="legend-row" data-layers="
+        Bus Routes > 10,
+        Frequency Transitions > 10,
+        Stations > 10,
+        Text > 10,
+        Route Termini > 10,
+        Express Stops > 10,
+        Route Labels > 10,
+        Route Arrows > 10,
+        Lines > Cbe/Pkm">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#671415"></span>
       <span class="legend-label">10 min or less</span>
     </label>
-    <label class="legend-row" data-layers="layer6,layer24,layer42,layer73,layer59,layer50,layer66,layer28,g9426,g9427,g9424">
+
+    <label class="legend-row" data-layers="
+        Bus Routes > 15,
+        Frequency Transitions > 15,
+        Stations > 15,
+        Text > 15,
+        Route Termini > 15,
+        Express Stops > 15,
+        Route Labels > 15,
+        Route Arrows > 15,
+        Lines > Glen Waverley,
+        Lines > Bel/Lil,
+        Lines > Alamein">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#a62624"></span>
       <span class="legend-label">15 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer7,layer23,layer39,layer72,layer58,layer53,layer65,g22,g21">
+
+    <label class="legend-row" data-layers="
+        Bus Routes > 20,
+        Frequency Transitions > 20,
+        Stations > 20,
+        Text > 20,
+        Route Termini > 20,
+        Express Stops > 20,
+        Route Labels > 20,
+        Route Arrows > 20,
+        Lines > Hurstbridge Inner">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#642d91"></span>
       <span class="legend-label">20 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer8,layer14,layer41,layer71,layer57,layer52,layer64,g9423,g9422">
+
+    <label class="legend-row" data-layers="
+        Bus Routes > 30,
+        Frequency Transitions > 30,
+        Stations > 30,
+        Text > 30,
+        Route Termini > 30,
+        Express Stops > 30,
+        Route Labels > 30,
+        Route Arrows > 30,
+        Lines > Lilydale Outer,
+        Lines > Belgrave Outer">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#2c8ab8"></span>
       <span class="legend-label">30 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer9,layer22,layer43,layer70,layer56,layer51,layer63,g23">
+
+    <label class="legend-row" data-layers="
+        Bus Routes > 60,
+        Frequency Transitions > 60,
+        Stations > 60,
+        Text > 60,
+        Route Termini > 60,
+        Express Stops > 60,
+        Route Labels > 60,
+        Route Arrows > 60,
+        Lines > Hurstbridge Outer">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#5d9a9d"></span>
       <span class="legend-label">40–60 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer10,layer25,layer44,layer69,layer55,layer48,layer62,layer36">
+
+    <label class="legend-row" data-layers="
+        Bus Routes > PO/LS,
+        Frequency Transitions > PO/LS,
+        Stations > PO/LS,
+        Text > PO/LS,
+        Route Termini > PO/LS,
+        Express Stops > PO/LS,
+        Route Labels > PO/LS,
+        Route Arrows > PO/LS,
+        Easterm Freeway 1 > PO/LS">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#8d6f32"></span>
       <span class="legend-label">Peak only / limited service</span>
     </label>
-    <label class="legend-row" data-layers="layer4">
+
+    <label class="legend-row" data-layers="Flexiride">
       <input type="checkbox" checked>
-      <span class="swatch-square" style="background:#f5c96e"></span>
+      <span class="swatch-square" style="background:#e8920a; border: 1.5px solid #b86d05;"></span>
       <span class="legend-label">Flexiride</span>
     </label>
 
@@ -313,22 +359,21 @@
     </div>
     <div class="legend-row" style="cursor:default;">
       <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-square" style="background:#b9d3b5; border-color:#8faa8b"></span>
+      <span class="swatch-rect" style="background:#b9d3b5; border: 1px solid #8faa8b;"></span>
       <span class="legend-label">Parks</span>
     </div>
     <div class="legend-row" style="cursor:default;">
       <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-square" style="background:#b5effb; border-color:#7dc8d8"></span>
+      <span class="swatch-rect" style="background:#b5effb; border: 1px solid #7dc8d8;"></span>
       <span class="legend-label">Lakes &amp; waterways</span>
     </div>
     <div class="legend-row" style="cursor:default;">
       <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-square" style="background:#b0b0b0; border-color:#888"></span>
+      <span class="swatch-rect" style="background:#e0e0e0; border: 1px solid #bbb;"></span>
       <span class="legend-label">Suburb labels</span>
     </div>
   </div>
 
-  <!-- Zoom controls -->
   <div class="zoom-controls">
     <button class="zoom-btn" id="zoomIn" title="Zoom in">+</button>
     <button class="zoom-btn zoom-reset" id="zoomReset" title="Reset zoom">1:1</button>
@@ -346,68 +391,122 @@
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'image/svg+xml');
     const svg = doc.querySelector('svg');
-    // Remove embedded legend layers
-    ['layer5_legend', 'layer14_legend'].forEach(id => {
-      const el = svg.getElementById(id);
-      if (el) el.remove();
-    });
+
+    svg.removeAttribute('width');
+    svg.removeAttribute('height');
+    svg.style.width = '100%';
+    svg.style.display = 'block';
+
     wrapper.innerHTML = '';
     wrapper.appendChild(svg);
+
+    initLabelMap(svg);
+    initToggles();
     initZoom(svg);
   } catch (e) {
     wrapper.innerHTML = '<p style="padding:2rem;text-align:center;color:#888;font-size:13px;">Could not load <code>recent_map.svg</code> — make sure it is in the same folder.</p>';
   }
 })();
 
-// ── Legend toggle ─────────────────────────────────────────────────────────────
-const btn = document.getElementById('legendBtn');
-const panel = document.getElementById('legendPanel');
+// ── Label map ─────────────────────────────────────────────────────────────────
+// Resolves human-readable layer names from data-layers attributes.
+//
+// Supports two key formats:
+//   "Label"            — matches any <g inkscape:label="Label">
+//   "Parent > Child"   — matches a child layer by both its own label
+//                        and its direct parent's label (avoids collisions
+//                        when the same frequency label "10", "15" etc.
+//                        appears under multiple parent groups)
+let labelMap = {};
 
-btn.addEventListener('click', () => {
-  const open = panel.classList.toggle('open');
-  btn.classList.toggle('open', open);
-  btn.setAttribute('aria-expanded', open);
+function initLabelMap(svg) {
+  labelMap = {};
+
+  // Map each element ID to its parent element
+  const parentOf = {};
+  svg.querySelectorAll('g').forEach(el => {
+    Array.from(el.children).forEach(child => {
+      if (child.tagName === 'g') {
+        parentOf[child.getAttribute('id') || ''] = el;
+      }
+    });
+  });
+
+  const getLabel = el => el.getAttribute('inkscape:label') || '';
+
+  svg.querySelectorAll('g[inkscape\\:label]').forEach(el => {
+    const label = getLabel(el);
+    if (!label) return;
+
+    // Bare label — first match wins (top-level layers typically unique)
+    if (!labelMap[label]) labelMap[label] = el;
+
+    // "Parent > Child" key
+    const parent = parentOf[el.getAttribute('id') || ''];
+    if (parent) {
+      const parentLabel = getLabel(parent);
+      if (parentLabel) {
+        const key = `${parentLabel} > ${label}`;
+        if (!labelMap[key]) labelMap[key] = el;
+      }
+    }
+  });
+}
+
+function resolveLayer(rawKey) {
+  return labelMap[rawKey.trim()] || null;
+}
+
+// ── Legend dropdown ───────────────────────────────────────────────────────────
+const legendBtn   = document.getElementById('legendBtn');
+const legendPanel = document.getElementById('legendPanel');
+
+legendBtn.addEventListener('click', () => {
+  const open = legendPanel.classList.toggle('open');
+  legendBtn.classList.toggle('open', open);
+  legendBtn.setAttribute('aria-expanded', open);
 });
 document.addEventListener('click', e => {
-  if (!btn.contains(e.target) && !panel.contains(e.target)) {
-    panel.classList.remove('open');
-    btn.classList.remove('open');
-    btn.setAttribute('aria-expanded', false);
+  if (!legendBtn.contains(e.target) && !legendPanel.contains(e.target)) {
+    legendPanel.classList.remove('open');
+    legendBtn.classList.remove('open');
+    legendBtn.setAttribute('aria-expanded', false);
   }
 });
 
 // ── Layer toggles ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
-  const checkbox = row.querySelector('input[type="checkbox"]');
-  const toggle = () => {
-    const ids = row.dataset.layers.split(',');
-    const hidden = !checkbox.checked;
-    row.classList.toggle('hidden', hidden);
-    ids.forEach(id => {
-      const layer = document.getElementById(id.trim());
-      if (layer) layer.style.display = hidden ? 'none' : '';
-    });
-  };
-  checkbox.addEventListener('change', toggle);
-  row.addEventListener('click', e => {
-    if (e.target === checkbox) return;
-    checkbox.checked = !checkbox.checked;
-    toggle();
-  });
-});
+function initToggles() {
+  document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
+    const checkbox = row.querySelector('input[type="checkbox"]');
 
-// ── viewBox-based zoom & pan ──────────────────────────────────────────────────
-// Zooming shrinks/moves the viewBox window, so the browser re-renders at full
-// vector quality. No CSS transform = no rasterisation artefacts.
+    const toggle = () => {
+      const keys  = row.dataset.layers.split(',');
+      const hidden = !checkbox.checked;
+      row.classList.toggle('hidden', hidden);
+      keys.forEach(key => {
+        const layer = resolveLayer(key);
+        if (layer) layer.style.display = hidden ? 'none' : '';
+      });
+    };
+
+    checkbox.addEventListener('change', toggle);
+    row.addEventListener('click', e => {
+      if (e.target === checkbox) return;
+      checkbox.checked = !checkbox.checked;
+      toggle();
+    });
+  });
+}
+
+// ── viewBox zoom & pan ────────────────────────────────────────────────────────
+// Shrinks/shifts the SVG viewBox rather than using CSS transform, so the
+// browser re-rasterises paths at full resolution on every zoom step.
 function initZoom(svg) {
   const container = document.getElementById('mapContainer');
   const wrapper   = document.getElementById('map-svg-wrapper');
 
-  // Parse the original viewBox
   const vbParts = svg.getAttribute('viewBox').split(/[\s,]+/).map(Number);
-  const origVB = { x: vbParts[0], y: vbParts[1], w: vbParts[2], h: vbParts[3] };
-
-  // Current viewBox state
+  const origVB  = { x: vbParts[0], y: vbParts[1], w: vbParts[2], h: vbParts[3] };
   let vb = { ...origVB };
 
   const MIN_SCALE = 1, MAX_SCALE = 12, ZOOM_STEP = 1.35;
@@ -416,33 +515,24 @@ function initZoom(svg) {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   }
 
-  // Convert a point in wrapper-pixel space to SVG viewBox space
   function toSVG(px, py) {
-    const rect = wrapper.getBoundingClientRect();
-    const ratioX = vb.w / rect.width;
-    const ratioY = vb.h / rect.height;
-    return {
-      x: vb.x + px * ratioX,
-      y: vb.y + py * ratioY,
-    };
+    const r = wrapper.getBoundingClientRect();
+    return { x: vb.x + px * (vb.w / r.width), y: vb.y + py * (vb.h / r.height) };
   }
 
   function currentScale() { return origVB.w / vb.w; }
 
   function zoomAt(px, py, factor) {
     const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, currentScale() * factor));
-    const targetW = origVB.w / newScale;
-    const targetH = origVB.h / newScale;
-    // Zoom towards the SVG point under the cursor
+    const targetW  = origVB.w / newScale;
+    const targetH  = origVB.h / newScale;
     const pt = toSVG(px, py);
-    const rx = (pt.x - vb.x) / vb.w; // relative position within current vb
+    const rx = (pt.x - vb.x) / vb.w;
     const ry = (pt.y - vb.y) / vb.h;
-    vb.w = targetW;
-    vb.h = targetH;
+    vb.w = targetW; vb.h = targetH;
     vb.x = pt.x - rx * vb.w;
     vb.y = pt.y - ry * vb.h;
-    clamp();
-    setViewBox();
+    clamp(); setViewBox();
   }
 
   function clamp() {
@@ -450,7 +540,7 @@ function initZoom(svg) {
     vb.y = Math.min(origVB.y + origVB.h - vb.h, Math.max(origVB.y, vb.y));
   }
 
-  // ── Buttons
+  // Buttons
   document.getElementById('zoomIn').addEventListener('click', () => {
     const r = wrapper.getBoundingClientRect();
     zoomAt(r.width / 2, r.height / 2, ZOOM_STEP);
@@ -460,77 +550,63 @@ function initZoom(svg) {
     zoomAt(r.width / 2, r.height / 2, 1 / ZOOM_STEP);
   });
   document.getElementById('zoomReset').addEventListener('click', () => {
-    vb = { ...origVB };
-    setViewBox();
+    vb = { ...origVB }; setViewBox();
   });
 
-  // ── Mouse wheel
+  // Scroll wheel
   wrapper.addEventListener('wheel', e => {
     e.preventDefault();
     const r = wrapper.getBoundingClientRect();
     zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
   }, { passive: false });
 
-  // ── Mouse drag pan
+  // Mouse drag
   let dragging = false, dragStartPt = null, dragStartVB = null;
 
   wrapper.addEventListener('mousedown', e => {
     if (currentScale() <= MIN_SCALE) return;
     dragging = true;
-    dragStartPt = toSVG(e.clientX - wrapper.getBoundingClientRect().left,
-                        e.clientY - wrapper.getBoundingClientRect().top);
+    const r = wrapper.getBoundingClientRect();
+    dragStartPt = toSVG(e.clientX - r.left, e.clientY - r.top);
     dragStartVB = { ...vb };
     container.classList.add('panning');
   });
   window.addEventListener('mousemove', e => {
     if (!dragging) return;
     const r = wrapper.getBoundingClientRect();
-    const ratioX = vb.w / r.width;
-    const ratioY = vb.h / r.height;
-    vb.x = dragStartVB.x - ((e.clientX - r.left) - (dragStartPt.x - dragStartVB.x) / ratioX) * ratioX;
-    vb.y = dragStartVB.y - ((e.clientY - r.top)  - (dragStartPt.y - dragStartVB.y) / ratioY) * ratioY;
-    clamp();
-    setViewBox();
+    const rx = vb.w / r.width, ry = vb.h / r.height;
+    vb.x = dragStartVB.x - ((e.clientX - r.left) - (dragStartPt.x - dragStartVB.x) / rx) * rx;
+    vb.y = dragStartVB.y - ((e.clientY - r.top)  - (dragStartPt.y - dragStartVB.y) / ry) * ry;
+    clamp(); setViewBox();
   });
   window.addEventListener('mouseup', () => {
     dragging = false;
     container.classList.remove('panning');
   });
 
-  // ── Touch pinch + drag
+  // Touch pinch + drag
   let lastTouches = null;
 
   wrapper.addEventListener('touchstart', e => {
-    lastTouches = Array.from(e.touches).map(t => ({
-      x: t.clientX - wrapper.getBoundingClientRect().left,
-      y: t.clientY - wrapper.getBoundingClientRect().top,
-    }));
+    const r = wrapper.getBoundingClientRect();
+    lastTouches = Array.from(e.touches).map(t => ({ x: t.clientX - r.left, y: t.clientY - r.top }));
   }, { passive: true });
 
   wrapper.addEventListener('touchmove', e => {
     e.preventDefault();
     const r = wrapper.getBoundingClientRect();
-    const touches = Array.from(e.touches).map(t => ({
-      x: t.clientX - r.left,
-      y: t.clientY - r.top,
-    }));
+    const cur = Array.from(e.touches).map(t => ({ x: t.clientX - r.left, y: t.clientY - r.top }));
 
-    if (touches.length === 2 && lastTouches && lastTouches.length === 2) {
-      const prev = lastTouches, cur = touches;
-      const prevDist = Math.hypot(prev[1].x - prev[0].x, prev[1].y - prev[0].y);
-      const curDist  = Math.hypot(cur[1].x  - cur[0].x,  cur[1].y  - cur[0].y);
-      const midX = (cur[0].x + cur[1].x) / 2;
-      const midY = (cur[0].y + cur[1].y) / 2;
-      if (prevDist > 0) zoomAt(midX, midY, curDist / prevDist);
-    } else if (touches.length === 1 && lastTouches && lastTouches.length === 1 && currentScale() > MIN_SCALE) {
-      const dx = (touches[0].x - lastTouches[0].x) * vb.w / r.width;
-      const dy = (touches[0].y - lastTouches[0].y) * vb.h / r.height;
-      vb.x -= dx;
-      vb.y -= dy;
-      clamp();
-      setViewBox();
+    if (cur.length === 2 && lastTouches?.length === 2) {
+      const prevD = Math.hypot(lastTouches[1].x - lastTouches[0].x, lastTouches[1].y - lastTouches[0].y);
+      const curD  = Math.hypot(cur[1].x - cur[0].x, cur[1].y - cur[0].y);
+      if (prevD > 0) zoomAt((cur[0].x + cur[1].x) / 2, (cur[0].y + cur[1].y) / 2, curD / prevD);
+    } else if (cur.length === 1 && lastTouches?.length === 1 && currentScale() > MIN_SCALE) {
+      vb.x -= (cur[0].x - lastTouches[0].x) * vb.w / r.width;
+      vb.y -= (cur[0].y - lastTouches[0].y) * vb.h / r.height;
+      clamp(); setViewBox();
     }
-    lastTouches = touches;
+    lastTouches = cur;
   }, { passive: false });
 
   wrapper.addEventListener('touchend', () => { lastTouches = null; });
