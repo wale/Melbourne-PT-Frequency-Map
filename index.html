@@ -43,7 +43,7 @@
   }
   .map-container.panning { cursor: grabbing; }
 
-  /* Zoom controls */
+  /* Zoom buttons */
   .zoom-controls {
     position: absolute;
     bottom: 12px;
@@ -60,6 +60,7 @@
     border: 1px solid #bbb;
     border-radius: 5px;
     font-size: 18px;
+    font-weight: 300;
     line-height: 1;
     cursor: pointer;
     display: flex;
@@ -67,16 +68,11 @@
     justify-content: center;
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
     color: #333;
-    font-weight: 300;
     transition: background 0.1s;
     user-select: none;
   }
   .zoom-btn:hover { background: #f0f0f0; }
-  .zoom-reset {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-  }
+  .zoom-btn.zoom-reset { font-size: 11px; font-weight: 600; letter-spacing: -0.03em; }
 
   #map-svg-wrapper {
     width: 100%;
@@ -87,11 +83,10 @@
 
   #map-svg-wrapper svg {
     width: 100%;
+    display: block;
+    /* NO CSS transform — zoom is done via viewBox */
     height: auto;
     display: block;
-    transform-origin: 0 0;
-    transition: transform 0.05s linear;
-    will-change: transform;
   }
 
   /* Legend toggle button */
@@ -129,7 +124,7 @@
     border: 1px solid #ccc;
     border-radius: 7px;
     padding: 12px 14px 10px;
-    min-width: 215px;
+    min-width: 210px;
     z-index: 20;
     box-shadow: 0 4px 16px rgba(0,0,0,0.13);
     opacity: 0;
@@ -164,7 +159,7 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    padding: 3px 2px;
+    padding: 3px 0;
     cursor: pointer;
     border-radius: 4px;
     transition: opacity 0.15s;
@@ -182,7 +177,6 @@
     flex-shrink: 0;
   }
 
-  /* Line swatch — solid bar */
   .swatch-line {
     width: 28px;
     height: 4px;
@@ -190,20 +184,18 @@
     flex-shrink: 0;
   }
 
-  /* Square swatch for Flexiride */
-  .swatch-square {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
+  .swatch-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
     flex-shrink: 0;
-    border: 1.5px solid rgba(0,0,0,0.15);
   }
 
-  .legend-note {
-    font-size: 11px;
-    color: #aaa;
-    font-style: italic;
-    padding: 2px 2px 4px;
+  .swatch-rect {
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
   }
 
   .legend-label {
@@ -219,19 +211,34 @@
     color: #888;
     font-size: 14px;
   }
+
+  .show-original-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: #666;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: underline;
+  }
+  .show-original-btn:hover { color: #333; }
 </style>
 </head>
 <body>
 
-<h1>Melbourne PT Frequency Map</h1>
+<h1>Melbourne PT-Frequency Map</h1>
 <p class="subtitle">Unofficial — current as of May 2026 · by Adam Bain</p>
 
-<div class="map-container" id="mapContainer">
+<div class="map-container">
   <div id="map-svg-wrapper">
     <div class="loading">Loading map…</div>
   </div>
 
-  <!-- Legend -->
   <button class="legend-btn" id="legendBtn" aria-expanded="false" aria-controls="legendPanel">
     <svg width="13" height="11" viewBox="0 0 13 11" fill="none">
       <rect x="0" y="0" width="7" height="2" rx="1" fill="#555"/>
@@ -248,93 +255,95 @@
   </button>
 
   <div class="legend-panel" id="legendPanel" role="region" aria-label="Map legend">
-    <p class="legend-section-title">Bus frequency</p>
+    <p class="legend-section-title">Service frequency</p>
 
-    <!--
-      data-layers: comma-separated layer IDs to toggle.
-      Bus route lines + their matching route-label circles + station markers + train lines of same freq.
-    -->
-    <label class="legend-row" data-layers="layer3,layer5,layer40,layer74,layer60,layer49,layer67,layer27,g9425">
+    <label class="legend-row" data-layers="layer3">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#671415"></span>
       <span class="legend-label">10 min or less</span>
     </label>
-    <label class="legend-row" data-layers="layer6,layer24,layer42,layer73,layer59,layer50,layer66,layer28,g9426,g9427,g9424">
+    <label class="legend-row" data-layers="layer6">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#a62624"></span>
       <span class="legend-label">15 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer7,layer23,layer39,layer72,layer58,layer53,layer65,g22,g21">
+    <label class="legend-row" data-layers="layer7">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#642d91"></span>
       <span class="legend-label">20 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer8,layer14,layer41,layer71,layer57,layer52,layer64,g9423,g9422">
+    <label class="legend-row" data-layers="layer8">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#2c8ab8"></span>
       <span class="legend-label">30 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer9,layer22,layer43,layer70,layer56,layer51,layer63,g23">
+    <label class="legend-row" data-layers="layer9">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#5d9a9d"></span>
       <span class="legend-label">40–60 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer10,layer25,layer44,layer69,layer55,layer48,layer62,layer36">
+    <label class="legend-row" data-layers="layer10">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#8d6f32"></span>
+      <span class="swatch-line" style="background:#8d6f32; border-top: 2px dashed #8d6f32; background: none; border-bottom: none;"></span>
       <span class="legend-label">Peak only / limited service</span>
     </label>
-
-    <hr class="legend-divider">
-    <p class="legend-section-title">On-demand</p>
-
     <label class="legend-row" data-layers="layer4">
       <input type="checkbox" checked>
-      <span class="swatch-square" style="background:#f5c96e"></span>
+      <span class="swatch-line" style="background:#e8a020"></span>
       <span class="legend-label">Flexiride</span>
     </label>
 
     <hr class="legend-divider">
-    <p class="legend-section-title">Other features</p>
-    <p class="legend-note">Always visible — not interactive</p>
+    <p class="legend-section-title">Features</p>
 
-    <div class="legend-row" style="cursor:default;">
-      <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-line" style="background:#000; height:3px; opacity:0.5"></span>
-      <span class="legend-label">Major road corridors</span>
-    </div>
-    <div class="legend-row" style="cursor:default;">
-      <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-line" style="background:#888; height:2px;"></span>
-      <span class="legend-label">Other roads</span>
-    </div>
-    <div class="legend-row" style="cursor:default;">
-      <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-square" style="background:#b9d3b5; border-color:#8faa8b"></span>
+    <label class="legend-row" data-layers="layer11">
+      <input type="checkbox" checked>
+      <span class="swatch-dot" style="background:#333"></span>
+      <span class="legend-label">Interchanges</span>
+    </label>
+    <label class="legend-row" data-layers="layer17">
+      <input type="checkbox" checked>
+      <span class="swatch-dot" style="background:#7a7a7a"></span>
+      <span class="legend-label">Points of interest</span>
+    </label>
+    <label class="legend-row" data-layers="layer18,layer20,layer1">
+      <input type="checkbox" checked>
+      <span class="swatch-line" style="background:#2c8ab8; height: 3px;"></span>
+      <span class="legend-label">Train routes &amp; stations</span>
+    </label>
+    <label class="legend-row" data-layers="layer16">
+      <input type="checkbox" checked>
+      <span class="swatch-rect" style="background:#b9d3b5; border: 1px solid #8faa8b;"></span>
       <span class="legend-label">Parks</span>
-    </div>
-    <div class="legend-row" style="cursor:default;">
-      <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-square" style="background:#b5effb; border-color:#7dc8d8"></span>
+    </label>
+    <label class="legend-row" data-layers="layer21">
+      <input type="checkbox" checked>
+      <span class="swatch-rect" style="background:#b5effb; border: 1px solid #7dc8d8;"></span>
       <span class="legend-label">Lakes &amp; waterways</span>
-    </div>
-    <div class="legend-row" style="cursor:default;">
-      <span style="width:14px;flex-shrink:0"></span>
-      <span class="swatch-square" style="background:#b0b0b0; border-color:#888"></span>
-      <span class="legend-label">Suburb labels</span>
-    </div>
-  </div>
+    </label>
+    <label class="legend-row" data-layers="layer13">
+      <input type="checkbox" checked>
+      <span class="legend-label" style="color:#888; font-style: italic;">Suburb labels</span>
+    </label>
 
+    <hr class="legend-divider">
+    <p class="legend-section-title">Route circles</p>
+    <label class="legend-row" data-layers="layer12,layer2">
+      <input type="checkbox" checked>
+      <span class="legend-label" style="color:#555;">Route numbers &amp; labels</span>
+    </label>
+
+  </div>
   <!-- Zoom controls -->
   <div class="zoom-controls">
-    <button class="zoom-btn" id="zoomIn" title="Zoom in">+</button>
+    <button class="zoom-btn" id="zoomIn"    title="Zoom in">+</button>
     <button class="zoom-btn zoom-reset" id="zoomReset" title="Reset zoom">1:1</button>
-    <button class="zoom-btn" id="zoomOut" title="Zoom out">−</button>
+    <button class="zoom-btn" id="zoomOut"   title="Zoom out">−</button>
   </div>
 </div>
 
 <script>
-// ── Load SVG ──────────────────────────────────────────────────────────────────
+// ── Load SVG then init zoom ───────────────────────────────────────────────────
 (async () => {
   const wrapper = document.getElementById('map-svg-wrapper');
   try {
@@ -343,11 +352,19 @@
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'image/svg+xml');
     const svg = doc.querySelector('svg');
+
     // Remove embedded legend layers
-    ['layer5_legend', 'layer14_legend'].forEach(id => {
+    ['layer5', 'layer14'].forEach(id => {
       const el = svg.getElementById(id);
       if (el) el.remove();
     });
+
+    // Make SVG responsive — keep its natural aspect ratio, fill container width
+    svg.removeAttribute('width');
+    svg.removeAttribute('height');
+    svg.style.width = '100%';
+    svg.style.display = 'block';
+
     wrapper.innerHTML = '';
     wrapper.appendChild(svg);
     initZoom(svg);
@@ -356,74 +373,61 @@
   }
 })();
 
-// ── Legend toggle ─────────────────────────────────────────────────────────────
-const btn = document.getElementById('legendBtn');
-const panel = document.getElementById('legendPanel');
-
-btn.addEventListener('click', () => {
-  const open = panel.classList.toggle('open');
-  btn.classList.toggle('open', open);
-  btn.setAttribute('aria-expanded', open);
-});
-document.addEventListener('click', e => {
-  if (!btn.contains(e.target) && !panel.contains(e.target)) {
-    panel.classList.remove('open');
-    btn.classList.remove('open');
-    btn.setAttribute('aria-expanded', false);
-  }
-});
-
-// ── Layer toggles ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
-  const checkbox = row.querySelector('input[type="checkbox"]');
-  const toggle = () => {
-    const ids = row.dataset.layers.split(',');
-    const hidden = !checkbox.checked;
-    row.classList.toggle('hidden', hidden);
-    ids.forEach(id => {
-      const layer = document.getElementById(id.trim());
-      if (layer) layer.style.display = hidden ? 'none' : '';
-    });
-  };
-  checkbox.addEventListener('change', toggle);
-  row.addEventListener('click', e => {
-    if (e.target === checkbox) return;
-    checkbox.checked = !checkbox.checked;
-    toggle();
-  });
-});
-
-// ── Zoom & Pan ────────────────────────────────────────────────────────────────
+// ── viewBox-based zoom & pan ──────────────────────────────────────────────────
+// Zooming shrinks/moves the viewBox window, so the browser re-renders at full
+// vector quality. No CSS transform = no rasterisation artefacts.
 function initZoom(svg) {
   const container = document.getElementById('mapContainer');
-  const wrapper = document.getElementById('map-svg-wrapper');
+  const wrapper   = document.getElementById('map-svg-wrapper');
 
-  let scale = 1;
-  let tx = 0, ty = 0;
-  const MIN_SCALE = 1, MAX_SCALE = 8, ZOOM_STEP = 1.35;
+  // Parse the original viewBox
+  const vbParts = svg.getAttribute('viewBox').split(/[\s,]+/).map(Number);
+  const origVB = { x: vbParts[0], y: vbParts[1], w: vbParts[2], h: vbParts[3] };
 
-  function applyTransform() {
-    // Clamp pan so map never drifts fully off-screen
-    const ww = wrapper.clientWidth;
-    const wh = wrapper.clientHeight || (ww * 0.8);
-    const scaledW = ww * scale;
-    const scaledH = wh * scale;
-    tx = Math.min(0, Math.max(tx, ww - scaledW));
-    ty = Math.min(0, Math.max(ty, wh - scaledH));
-    svg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  // Current viewBox state
+  let vb = { ...origVB };
+
+  const MIN_SCALE = 1, MAX_SCALE = 12, ZOOM_STEP = 1.35;
+
+  function setViewBox() {
+    svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   }
 
-  function zoomAt(cx, cy, factor) {
-    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * factor));
-    if (newScale === scale) return;
-    // Adjust translation so zoom centres on (cx, cy) within the wrapper
-    tx = cx - (cx - tx) * (newScale / scale);
-    ty = cy - (cy - ty) * (newScale / scale);
-    scale = newScale;
-    applyTransform();
+  // Convert a point in wrapper-pixel space to SVG viewBox space
+  function toSVG(px, py) {
+    const rect = wrapper.getBoundingClientRect();
+    const ratioX = vb.w / rect.width;
+    const ratioY = vb.h / rect.height;
+    return {
+      x: vb.x + px * ratioX,
+      y: vb.y + py * ratioY,
+    };
   }
 
-  // Buttons
+  function currentScale() { return origVB.w / vb.w; }
+
+  function zoomAt(px, py, factor) {
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, currentScale() * factor));
+    const targetW = origVB.w / newScale;
+    const targetH = origVB.h / newScale;
+    // Zoom towards the SVG point under the cursor
+    const pt = toSVG(px, py);
+    const rx = (pt.x - vb.x) / vb.w; // relative position within current vb
+    const ry = (pt.y - vb.y) / vb.h;
+    vb.w = targetW;
+    vb.h = targetH;
+    vb.x = pt.x - rx * vb.w;
+    vb.y = pt.y - ry * vb.h;
+    clamp();
+    setViewBox();
+  }
+
+  function clamp() {
+    vb.x = Math.min(origVB.x + origVB.w - vb.w, Math.max(origVB.x, vb.x));
+    vb.y = Math.min(origVB.y + origVB.h - vb.h, Math.max(origVB.y, vb.y));
+  }
+
+  // ── Buttons
   document.getElementById('zoomIn').addEventListener('click', () => {
     const r = wrapper.getBoundingClientRect();
     zoomAt(r.width / 2, r.height / 2, ZOOM_STEP);
@@ -433,75 +437,125 @@ function initZoom(svg) {
     zoomAt(r.width / 2, r.height / 2, 1 / ZOOM_STEP);
   });
   document.getElementById('zoomReset').addEventListener('click', () => {
-    scale = 1; tx = 0; ty = 0;
-    applyTransform();
+    vb = { ...origVB };
+    setViewBox();
   });
 
-  // Mouse wheel zoom
+  // ── Mouse wheel
   wrapper.addEventListener('wheel', e => {
     e.preventDefault();
     const r = wrapper.getBoundingClientRect();
-    const cx = e.clientX - r.left;
-    const cy = e.clientY - r.top;
-    const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-    zoomAt(cx, cy, factor);
+    zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
   }, { passive: false });
 
-  // Mouse drag pan
-  let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+  // ── Mouse drag pan
+  let dragging = false, dragStartPt = null, dragStartVB = null;
 
   wrapper.addEventListener('mousedown', e => {
-    if (scale <= MIN_SCALE) return;
+    if (currentScale() <= MIN_SCALE) return;
     dragging = true;
-    startX = e.clientX; startY = e.clientY;
-    startTx = tx; startTy = ty;
+    dragStartPt = toSVG(e.clientX - wrapper.getBoundingClientRect().left,
+                        e.clientY - wrapper.getBoundingClientRect().top);
+    dragStartVB = { ...vb };
     container.classList.add('panning');
   });
   window.addEventListener('mousemove', e => {
     if (!dragging) return;
-    tx = startTx + (e.clientX - startX);
-    ty = startTy + (e.clientY - startY);
-    applyTransform();
+    const r = wrapper.getBoundingClientRect();
+    const ratioX = vb.w / r.width;
+    const ratioY = vb.h / r.height;
+    vb.x = dragStartVB.x - ((e.clientX - r.left) - (dragStartPt.x - dragStartVB.x) / ratioX) * ratioX;
+    vb.y = dragStartVB.y - ((e.clientY - r.top)  - (dragStartPt.y - dragStartVB.y) / ratioY) * ratioY;
+    clamp();
+    setViewBox();
   });
   window.addEventListener('mouseup', () => {
     dragging = false;
     container.classList.remove('panning');
   });
 
-  // Touch pinch-zoom + drag
-  let lastDist = null, lastMidX = 0, lastMidY = 0;
-  let touchStartTx = 0, touchStartTy = 0, touchStartX = 0, touchStartY = 0;
+  // ── Touch pinch + drag
+  let lastTouches = null;
 
   wrapper.addEventListener('touchstart', e => {
-    if (e.touches.length === 2) {
-      const t0 = e.touches[0], t1 = e.touches[1];
-      lastDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
-      const r = wrapper.getBoundingClientRect();
-      lastMidX = ((t0.clientX + t1.clientX) / 2) - r.left;
-      lastMidY = ((t0.clientY + t1.clientY) / 2) - r.top;
-    } else if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      touchStartTx = tx; touchStartTy = ty;
-    }
+    lastTouches = Array.from(e.touches).map(t => ({
+      x: t.clientX - wrapper.getBoundingClientRect().left,
+      y: t.clientY - wrapper.getBoundingClientRect().top,
+    }));
   }, { passive: true });
 
   wrapper.addEventListener('touchmove', e => {
     e.preventDefault();
-    if (e.touches.length === 2) {
-      const t0 = e.touches[0], t1 = e.touches[1];
-      const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
-      if (lastDist) zoomAt(lastMidX, lastMidY, dist / lastDist);
-      lastDist = dist;
-    } else if (e.touches.length === 1 && scale > MIN_SCALE) {
-      tx = touchStartTx + (e.touches[0].clientX - touchStartX);
-      ty = touchStartTy + (e.touches[0].clientY - touchStartY);
-      applyTransform();
+    const r = wrapper.getBoundingClientRect();
+    const touches = Array.from(e.touches).map(t => ({
+      x: t.clientX - r.left,
+      y: t.clientY - r.top,
+    }));
+
+    if (touches.length === 2 && lastTouches && lastTouches.length === 2) {
+      const prev = lastTouches, cur = touches;
+      const prevDist = Math.hypot(prev[1].x - prev[0].x, prev[1].y - prev[0].y);
+      const curDist  = Math.hypot(cur[1].x  - cur[0].x,  cur[1].y  - cur[0].y);
+      const midX = (cur[0].x + cur[1].x) / 2;
+      const midY = (cur[0].y + cur[1].y) / 2;
+      if (prevDist > 0) zoomAt(midX, midY, curDist / prevDist);
+    } else if (touches.length === 1 && lastTouches && lastTouches.length === 1 && currentScale() > MIN_SCALE) {
+      const dx = (touches[0].x - lastTouches[0].x) * vb.w / r.width;
+      const dy = (touches[0].y - lastTouches[0].y) * vb.h / r.height;
+      vb.x -= dx;
+      vb.y -= dy;
+      clamp();
+      setViewBox();
     }
+    lastTouches = touches;
   }, { passive: false });
 
-  wrapper.addEventListener('touchend', () => { lastDist = null; });
+  wrapper.addEventListener('touchend', () => { lastTouches = null; });
 }
+
+// Legend toggle
+const btn = document.getElementById('legendBtn');
+const panel = document.getElementById('legendPanel');
+
+btn.addEventListener('click', () => {
+  const open = panel.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open);
+});
+
+document.addEventListener('click', e => {
+  if (!btn.contains(e.target) && !panel.contains(e.target)) {
+    panel.classList.remove('open');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded', false);
+  }
+});
+
+// Layer toggles
+document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
+  const checkbox = row.querySelector('input[type="checkbox"]');
+
+  const toggle = () => {
+    const layerIds = row.dataset.layers.split(',');
+    const hidden = !checkbox.checked;
+    row.classList.toggle('hidden', hidden);
+
+    layerIds.forEach(id => {
+      const layer = document.getElementById(id.trim());
+      if (layer) {
+        layer.style.display = hidden ? 'none' : '';
+      }
+    });
+  };
+
+  checkbox.addEventListener('change', toggle);
+  // Allow clicking the row itself (but not the checkbox twice)
+  row.addEventListener('click', e => {
+    if (e.target === checkbox) return;
+    checkbox.checked = !checkbox.checked;
+    toggle();
+  });
+});
 </script>
 </body>
 </html>
