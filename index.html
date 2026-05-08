@@ -6,47 +6,78 @@
 <title>Melbourne PT Frequency Map</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-}
+ 
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+ 
   body {
     font-family: Arial, Helvetica, sans-serif;
     background: #f4f4f0;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 1.5rem 1rem 3rem;
   }
-
-  h1 {
-    font-size: 1.6rem;
+ 
+  /* ── Top bar ── */
+  .top-bar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  height: 52px;
+  border-bottom: 1px solid #ddd;
+  z-index: 30;
+}
+ 
+  .top-bar h1 {
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1a1a1a;
-    margin-bottom: 0.25rem;
     letter-spacing: -0.01em;
+    white-space: nowrap;
   }
-
-  .subtitle {
+ 
+  .top-bar .subtitle {
     font-size: 1rem;
-    color: #666;
-    margin-bottom: 1.25rem;
+    color: #999;
+    white-space: nowrap;
   }
-
+ 
+  /* ── Map fills remaining height ── */
   .map-container {
     position: relative;
-    width: 100%;
-    max-width: 1000px;
+    flex: 1 1 0;
+    min-height: 0;
     background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
     overflow: hidden;
     cursor: grab;
   }
   .map-container.panning { cursor: grabbing; }
-
-  /* Zoom buttons */
+ 
+  #map-svg-wrapper {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: hidden;
+    touch-action: none;
+  }
+ 
+  #map-svg-wrapper svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  #map-svg-wrapper {
+  user-select: none;
+  -webkit-user-select: none;
+}
+ 
+  /* ── Zoom controls ── */
   .zoom-controls {
     position: absolute;
     bottom: 12px;
@@ -76,23 +107,8 @@ html, body {
   }
   .zoom-btn:hover { background: #f0f0f0; }
   .zoom-btn.zoom-reset { font-size: 11px; font-weight: 600; letter-spacing: -0.03em; }
-
-  #map-svg-wrapper {
-    width: 100%;
-    display: block;
-    overflow: hidden;
-    touch-action: none;
-  }
-
-  #map-svg-wrapper svg {
-    width: 100%;
-    display: block;
-    /* NO CSS transform — zoom is done via viewBox */
-    height: auto;
-    display: block;
-  }
-
-  /* Legend toggle button */
+ 
+  /* ── Legend toggle button ── */
   .legend-btn {
     position: absolute;
     top: 10px;
@@ -117,8 +133,8 @@ html, body {
   .legend-btn svg { flex-shrink: 0; }
   .legend-btn .arrow { transition: transform 0.18s; }
   .legend-btn.open .arrow { transform: rotate(180deg); }
-
-  /* Dropdown panel */
+ 
+  /* ── Legend dropdown panel ── */
   .legend-panel {
     position: absolute;
     top: 44px;
@@ -140,7 +156,7 @@ html, body {
     pointer-events: auto;
     transform: translateY(0);
   }
-
+ 
   .legend-section-title {
     font-size: 10px;
     font-weight: 700;
@@ -151,13 +167,13 @@ html, body {
     margin-top: 4px;
   }
   .legend-section-title:first-child { margin-top: 0; }
-
+ 
   .legend-divider {
     border: none;
     border-top: 1px solid #eee;
     margin: 8px 0;
   }
-
+ 
   .legend-row {
     display: flex;
     align-items: center;
@@ -170,7 +186,7 @@ html, body {
   }
   .legend-row:hover { background: #f8f8f8; }
   .legend-row.hidden { opacity: 0.35; }
-
+ 
   .legend-row input[type="checkbox"] {
     width: 14px;
     height: 14px;
@@ -179,77 +195,48 @@ html, body {
     accent-color: #444;
     flex-shrink: 0;
   }
-
+  
+  .legend-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+}
+.legend-backdrop.open {
+  display: block;
+}
+ 
   .swatch-line {
     width: 28px;
     height: 4px;
     border-radius: 2px;
     flex-shrink: 0;
   }
-  
-    .swatch-fwy {
-    width: 38px;
-    height: 7px;
-    
-
-  
-    border-radius: 2px;
-  
-    position: relative;
-    display: inline-block;
-    flex-shrink: 0;
-  }
-  
-  .swatch-fwy::after {
-    content: "M5";
-  
-    position: absolute;
-  
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  
-    color: white;
-  
-    font-size: 9px;
-    font-weight: 700;
-    line-height: 1;
-  
-    font-family: Arial, Helvetica, sans-serif;
-    
-    
-  background: #2c8ab8; 
-  padding: 2px 2px;   
-
-  border-radius: 3px;
-  
-    pointer-events: none;
-  }
-
-.swatch-fwy {
+ 
+  .swatch-fwy {
     width: 28px;
     height: 8px;
     border-radius: 2px;
     flex-shrink: 0;
+    position: relative;
+    display: inline-block;
   }
-  
-    .swatch-fwy::after {
-  content: "M5";
 
-  position: absolute;
-
-  background: #dfdfdfff;
-  color: white;
-
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-
-  border-radius: 2px;
-
-  font-family: Arial, Helvetica, sans-serif;
-}
-
+  .swatch-fwy::after {
+    content: "M5";
+    position: absolute;
+      top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #dfdfdfff;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 2px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+ 
   .swatch-interchange {
     width: 16px;
     height: 16px;
@@ -258,7 +245,6 @@ html, body {
     position: relative;
     flex-shrink: 0;
   }
-  
   .swatch-interchange::after {
     content: "";
     position: absolute;
@@ -266,7 +252,7 @@ html, body {
     background: #fff;
     border-radius: 1px;
   }
-
+ 
   .swatch-poi {
     width: 16px;
     height: 16px;
@@ -275,7 +261,6 @@ html, body {
     position: relative;
     flex-shrink: 0;
   }
-  
   .swatch-poi::after {
     content: "★";
     position: absolute;
@@ -286,8 +271,8 @@ html, body {
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
   }
-  
-    .swatch-hosp {
+ 
+  .swatch-hosp {
     width: 16px;
     height: 16px;
     background: #7a7a7a;
@@ -295,7 +280,6 @@ html, body {
     position: relative;
     flex-shrink: 0;
   }
-  
   .swatch-hosp::after {
     content: "+";
     position: absolute;
@@ -307,42 +291,49 @@ html, body {
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
   }
+ 
   .swatch-rect {
     width: 16px;
     height: 12px;
     border-radius: 2px;
     flex-shrink: 0;
   }
-
+ 
   .legend-label {
     font-size: 12px;
     color: #222;
     font-family: Arial, Helvetica, sans-serif;
     line-height: 1.3;
   }
-
+ 
   .loading {
     padding: 3rem 2rem;
     text-align: center;
     color: #888;
     font-size: 14px;
   }
-
-  .show-original-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    padding: 0;
-    background: none;
-    border: none;
-    font-size: 11px;
-    color: #666;
-    cursor: pointer;
-    font-family: Arial, Helvetica, sans-serif;
-    text-decoration: underline;
+ 
+  /* ── Mobile: legend slides up from bottom ── */
+  @media (max-width: 768px) {
+    .top-bar h1 { font-size: 0.9rem; }
+    .top-bar .subtitle { font-size: 0.75rem; }
+ 
+    .legend-panel {
+      right: 0;
+      left: 0;
+      top: auto;
+      bottom: 0;
+      width: 100%;
+      max-height: 55vh;
+      overflow-y: auto;
+      border-radius: 12px 12px 0 0;
+      transform: translateY(100%);
+    }
+    .legend-panel.open { transform: translateY(0); }
+ 
+    .zoom-controls { bottom: 16px; right: 12px; gap: 6px; }
+    .zoom-btn { width: 38px; height: 38px; font-size: 20px; }
   }
-  .show-original-btn:hover { color: #333; }
   
   @media (max-width: 768px) {
   .legend-panel {
@@ -351,61 +342,39 @@ html, body {
     top: auto;
     bottom: 0;
     width: 100%;
-    max-height: 55vh;
+    max-height: 70vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     border-radius: 12px 12px 0 0;
     transform: translateY(100%);
-  }
-
-  .legend-panel.open {
-    transform: translateY(0);
-  }
-
-  .legend-btn {
-    top: 10px;
-    right: 10px;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
   }
 }
-
-@media (max-width: 768px) {
-  .zoom-controls {
-    bottom: 16px;
-    right: 12px;
-    gap: 6px;
+ 
+  @media (max-height: 500px) and (orientation: landscape) {
+    .legend-panel { max-height: 70vh; }
+    .zoom-controls { bottom: 8px; }
   }
-
-  .zoom-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 20px;
-  }
-}
-
-@media (max-height: 500px) and (orientation: landscape) {
-  .subtitle {
-    display: none;
-  }
-
-  .legend-panel {
-    max-height: 70vh;
-  }
-
-  .zoom-controls {
-    bottom: 8px;
-  }
-}
 </style>
 </head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <body>
-
-<h1>Melbourne PT Frequency Map</h1>
-<p class="subtitle">Unofficial — current as of May 2026 · by Adam Bain</p>
-
+ 
+<!-- ── Top bar ── -->
+<div class="top-bar">
+  <h1>Melbourne PT Frequency Map</h1>
+  <span class="subtitle"", style = "margin-top:2px;">Unofficial - Current as of May 2026 - by Adam Bain</span>
+</div>
+ 
+<!-- ── Full-screen map ── -->
 <div class="map-container">
   <div id="map-svg-wrapper">
     <div class="loading">Loading map…</div>
   </div>
-
+  
+    <div class="legend-backdrop" id="legendBackdrop"></div>
+ 
+  <!-- Legend toggle -->
   <button class="legend-btn" id="legendBtn" aria-expanded="false" aria-controls="legendPanel">
     <svg width="13" height="11" viewBox="0 0 13 11" fill="none">
       <rect x="0" y="0" width="7" height="2" rx="1" fill="#555"/>
@@ -420,10 +389,11 @@ html, body {
       <path d="M1 1L5 5.5L9 1" stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-
+ 
+  <!-- Legend panel -->
   <div class="legend-panel" id="legendPanel" role="region" aria-label="Map legend">
     <p class="legend-section-title">At Midday on a Weekday<br> this Service Runs Every:</p>
-
+ 
     <label class="legend-row" data-layers="layer3, layer5, layer60, layer49, layer74, layer67, layer40, layer27, layer80">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#671415"></span>
@@ -452,17 +422,17 @@ html, body {
     <label class="legend-row" data-layers="layer10, layer69, layer48, layer62, layer75, layer44, layer55, layer25, layer36, layer29">
       <input type="checkbox" checked>
       <span class="swatch-line" style="background:#8d6f32"></span>
-      <span class="legend-label">Peak Only / Limited Srvice</span>
+      <span class="legend-label">Peak Only / Limited Service</span>
     </label>
     <label class="legend-row" data-layers="layer4">
       <input type="checkbox" checked>
       <span class="swatch-rect" style="background:#fae8ceff"></span>
       <span class="legend-label">Flexiride</span>
     </label>
-
+ 
     <hr class="legend-divider">
     <p class="legend-section-title">Features</p>
-
+ 
     <label class="legend-row" data-layers="layer11">
       <span class="swatch-interchange" style="background:#333"></span>
       <span class="legend-label">Interchanges</span>
@@ -471,7 +441,7 @@ html, body {
       <span class="swatch-poi" style="background:#7a7a7a"></span>
       <span class="legend-label">Points of interest</span>
     </label>
-      <label class="legend-row" data-layers="layer17">
+    <label class="legend-row" data-layers="layer17">
       <span class="swatch-hosp" style="background:#7a7a7a"></span>
       <span class="legend-label">Hospital</span>
     </label>
@@ -487,8 +457,8 @@ html, body {
       <span class="swatch-rect" style="background:#b5effb; border: 1px solid #7dc8d8;"></span>
       <span class="legend-label">Lakes &amp; waterways</span>
     </label>
-
   </div>
+ 
   <!-- Zoom controls -->
   <div class="zoom-controls">
     <button class="zoom-btn" id="zoomIn"    title="Zoom in">+</button>
@@ -496,9 +466,8 @@ html, body {
     <button class="zoom-btn zoom-reset" id="zoomReset" title="Reset zoom">MAX</button>
   </div>
 </div>
-
+ 
 <script>
-// ── Load SVG then init zoom ───────────────────────────────────────────────────
 (async () => {
   const wrapper = document.getElementById('map-svg-wrapper');
   try {
@@ -507,61 +476,63 @@ html, body {
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'image/svg+xml');
     const svg = doc.querySelector('svg');
-
-    // Make SVG responsive — keep its natural aspect ratio, fill container width
+ 
     svg.removeAttribute('width');
     svg.removeAttribute('height');
     svg.style.width = '100%';
+    svg.style.height = '100%';
     svg.style.display = 'block';
-
+ 
     wrapper.innerHTML = '';
     wrapper.appendChild(svg);
     initZoom(svg);
   } catch (e) {
     wrapper.innerHTML = '<p style="padding:2rem;text-align:center;color:#888;font-size:13px;">Could not load <code>recent_map.svg</code> — make sure it is in the same folder.</p>';
   }
+  
 })();
-
-// ── viewBox-based zoom & pan ──────────────────────────────────────────────────
-// Zooming shrinks/moves the viewBox window, so the browser re-renders at full
-// vector quality. No CSS transform = no rasterisation artefacts.
+ 
 function initZoom(svg) {
   const container = document.querySelector('.map-container');
   const wrapper   = document.getElementById('map-svg-wrapper');
-
-  // Parse the original viewBox
+ 
   const vbParts = svg.getAttribute('viewBox').split(/[\s,]+/).map(Number);
   const origVB = { x: vbParts[0], y: vbParts[1], w: vbParts[2], h: vbParts[3] };
-
-  // Current viewBox state
   let vb = { ...origVB };
+  
+  const initialScale = 2;
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    vb.w = origVB.w / initialScale;
+    vb.h = origVB.h / initialScale;
+    vb.x = origVB.x + (origVB.w - vb.w) / 2;
+    vb.y = origVB.y + (origVB.h - vb.h) / 2;
+    setViewBox();
+  });
+});
 
   const MIN_SCALE = 1, MAX_SCALE = 12, ZOOM_STEP = 1.35;
-
+ 
   function setViewBox() {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   }
-
-  // Convert a point in wrapper-pixel space to SVG viewBox space
+ 
   function toSVG(px, py) {
     const rect = wrapper.getBoundingClientRect();
-    const ratioX = vb.w / rect.width;
-    const ratioY = vb.h / rect.height;
     return {
-      x: vb.x + px * ratioX,
-      y: vb.y + py * ratioY,
+      x: vb.x + px * (vb.w / rect.width),
+      y: vb.y + py * (vb.h / rect.height),
     };
   }
-
+ 
   function currentScale() { return origVB.w / vb.w; }
-
+ 
   function zoomAt(px, py, factor) {
     const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, currentScale() * factor));
     const targetW = origVB.w / newScale;
     const targetH = origVB.h / newScale;
-    // Zoom towards the SVG point under the cursor
     const pt = toSVG(px, py);
-    const rx = (pt.x - vb.x) / vb.w; // relative position within current vb
+    const rx = (pt.x - vb.x) / vb.w;
     const ry = (pt.y - vb.y) / vb.h;
     vb.w = targetW;
     vb.h = targetH;
@@ -570,13 +541,12 @@ function initZoom(svg) {
     clamp();
     setViewBox();
   }
-
+ 
   function clamp() {
     vb.x = Math.min(origVB.x + origVB.w - vb.w, Math.max(origVB.x, vb.x));
     vb.y = Math.min(origVB.y + origVB.h - vb.h, Math.max(origVB.y, vb.y));
   }
-
-  // ── Buttons
+ 
   document.getElementById('zoomIn').addEventListener('click', () => {
     const r = wrapper.getBoundingClientRect();
     zoomAt(r.width / 2, r.height / 2, ZOOM_STEP);
@@ -589,22 +559,21 @@ function initZoom(svg) {
     vb = { ...origVB };
     setViewBox();
   });
-
-  // ── Mouse wheel
+ 
   wrapper.addEventListener('wheel', e => {
     e.preventDefault();
     const r = wrapper.getBoundingClientRect();
     zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
   }, { passive: false });
-
-  // ── Mouse drag pan
+ 
   let dragging = false, dragStartPt = null, dragStartVB = null;
-
+ 
   wrapper.addEventListener('mousedown', e => {
+  e.preventDefault();
     if (currentScale() <= MIN_SCALE) return;
     dragging = true;
-    dragStartPt = toSVG(e.clientX - wrapper.getBoundingClientRect().left,
-                        e.clientY - wrapper.getBoundingClientRect().top);
+    const r = wrapper.getBoundingClientRect();
+    dragStartPt = toSVG(e.clientX - r.left, e.clientY - r.top);
     dragStartVB = { ...vb };
     container.classList.add('panning');
   });
@@ -622,17 +591,17 @@ function initZoom(svg) {
     dragging = false;
     container.classList.remove('panning');
   });
-
-  // ── Touch pinch + drag
+ 
   let lastTouches = null;
-
+ 
   wrapper.addEventListener('touchstart', e => {
-    lastTouches = Array.from(e.touches).map(t => ({
-      x: t.clientX - wrapper.getBoundingClientRect().left,
-      y: t.clientY - wrapper.getBoundingClientRect().top,
-    }));
-  }, { passive: true });
-
+  if (e.touches.length > 1) e.preventDefault();
+  lastTouches = Array.from(e.touches).map(t => ({
+    x: t.clientX - wrapper.getBoundingClientRect().left,
+    y: t.clientY - wrapper.getBoundingClientRect().top,
+  }));
+}, { passive: false });
+ 
   wrapper.addEventListener('touchmove', e => {
     e.preventDefault();
     const r = wrapper.getBoundingClientRect();
@@ -640,7 +609,7 @@ function initZoom(svg) {
       x: t.clientX - r.left,
       y: t.clientY - r.top,
     }));
-
+ 
     if (touches.length === 2 && lastTouches && lastTouches.length === 2) {
       const prev = lastTouches, cur = touches;
       const prevDist = Math.hypot(prev[1].x - prev[0].x, prev[1].y - prev[0].y);
@@ -658,108 +627,83 @@ function initZoom(svg) {
     }
     lastTouches = touches;
   }, { passive: false });
-
-    // ── Double tap zoom
-  let lastTapTime = 0;
-  let lastTapPos = null;
-  let touchMoved = false;
-
-  const DOUBLE_TAP_DELAY = 300;
-  const DOUBLE_TAP_DISTANCE = 30;
-
-  wrapper.addEventListener('touchstart', () => {
-    touchMoved = false;
-  }, { passive: true });
-
-  wrapper.addEventListener('touchmove', () => {
-    touchMoved = true;
-  }, { passive: true });
-
+ 
+  let lastTapTime = 0, lastTapPos = null, touchMoved = false;
+  const DOUBLE_TAP_DELAY = 300, DOUBLE_TAP_DISTANCE = 30;
+ 
+  wrapper.addEventListener('touchstart', () => { touchMoved = false; }, { passive: true });
+  wrapper.addEventListener('touchmove',  () => { touchMoved = true;  }, { passive: true });
+ 
   wrapper.addEventListener('touchend', e => {
-
-    if (touchMoved) {
-      lastTouches = null;
-      return;
-    }
-
+    if (touchMoved) { lastTouches = null; return; }
     if (e.changedTouches.length !== 1) return;
-
     const now = Date.now();
-
     const touch = e.changedTouches[0];
     const r = wrapper.getBoundingClientRect();
-
     const tapX = touch.clientX - r.left;
     const tapY = touch.clientY - r.top;
-
-    const isDoubleTap =
-      lastTapPos &&
+    const isDoubleTap = lastTapPos &&
       (now - lastTapTime < DOUBLE_TAP_DELAY) &&
-      Math.hypot(
-        tapX - lastTapPos.x,
-        tapY - lastTapPos.y
-      ) < DOUBLE_TAP_DISTANCE;
-
+      Math.hypot(tapX - lastTapPos.x, tapY - lastTapPos.y) < DOUBLE_TAP_DISTANCE;
     if (isDoubleTap) {
-
       e.preventDefault();
-
       zoomAt(tapX, tapY, ZOOM_STEP);
-
       lastTapTime = 0;
       lastTapPos = null;
-
     } else {
-
       lastTapTime = now;
       lastTapPos = { x: tapX, y: tapY };
-
     }
-
     lastTouches = null;
-
   }, { passive: false });
+}
+ 
+// Legend toggle
+const btn      = document.getElementById('legendBtn');
+const panel    = document.getElementById('legendPanel');
+const backdrop = document.getElementById('legendBackdrop');
 
+function openLegend() {
+  panel.classList.add('open');
+  backdrop.classList.add('open');
+  btn.classList.add('open');
+  btn.setAttribute('aria-expanded', true);
 }
 
+function closeLegend() {
+  panel.classList.remove('open');
+  backdrop.classList.remove('open');
+  btn.classList.remove('open');
+  btn.setAttribute('aria-expanded', false);
+}
 
-// Legend toggle
-const btn = document.getElementById('legendBtn');
-const panel = document.getElementById('legendPanel');
-
-btn.addEventListener('click', () => {
-  const open = panel.classList.toggle('open');
-  btn.classList.toggle('open', open);
-  btn.setAttribute('aria-expanded', open);
+btn.addEventListener('click', e => {
+  e.stopPropagation();
+  panel.classList.contains('open') ? closeLegend() : openLegend();
 });
+
+backdrop.addEventListener('click', closeLegend);
 
 document.addEventListener('click', e => {
-  if (!btn.contains(e.target) && !panel.contains(e.target)) {
-    panel.classList.remove('open');
-    btn.classList.remove('open');
-    btn.setAttribute('aria-expanded', false);
-  }
+  if (!btn.contains(e.target) && !panel.contains(e.target)) closeLegend();
 });
-
+ 
 // Layer toggles
 document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
   const checkbox = row.querySelector('input[type="checkbox"]');
-
+  if (!checkbox) return;
+ 
   const toggle = () => {
     const layerIds = row.dataset.layers.split(',');
     const hidden = !checkbox.checked;
     row.classList.toggle('hidden', hidden);
-
     layerIds.forEach(id => {
       const layer = document.getElementById(id.trim());
-      if (layer) {
-        layer.style.display = hidden ? 'none' : '';
-      }
+      if (layer) layer.style.display = hidden ? 'none' : '';
     });
   };
-
+ 
   checkbox.addEventListener('change', toggle);
-  // Allow clicking the row itself (but not the checkbox twice)
   row.addEventListener('click', e => {
     if (e.target === checkbox) return;
     checkbox.checked = !checkbox.checked;
