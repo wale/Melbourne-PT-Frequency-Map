@@ -1,9 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+  
+  <!-- Open Graph (Discord, Facebook, Reddit) -->
+<meta property="og:title" content="Melbourne PT Frequency Map">
+<meta property="og:description" content="See how often trams, trains and buses run across Melbourne at midday on a weekday — colour-coded by frequency.">
+<meta property="og:image" content="https://adambain014.github.io/Melbourne-PT-Frequency-Map/preview.png">
+<meta property="og:url" content="https://adambain014.github.io/Melbourne-PT-Frequency-Map/">
+<meta property="og:type" content="website">
+
+<!-- Twitter/X card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Melbourne PT Frequency Map">
+<meta name="twitter:description" content="See how often trams, trains and buses run across Melbourne at midday on a weekday — colour-coded by frequency.">
+<meta name="twitter:image" content="https://adambain014.github.io/Melbourne-PT-Frequency-Map/preview.png">
+
+
+<link rel="icon" type="image/png" href="https://adambain014.github.io/Melbourne-PT-Frequency-Map/icon.png">
 <title>Melbourne PT Frequency Map</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -105,7 +120,7 @@
   /* ── Dark mode toggle button ── */
   .dark-toggle {
     position: absolute;
-    left: 12px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -594,7 +609,7 @@ const DARK_SVG  = 'dark_map.svg';
 // Legend swatch colours per mode
 const SWATCH_LIGHT = {
   'freq-10':  '#671415',
-  'freq-15':  '#a62624',
+  'freq-15':  '#FFF059',
   'freq-20':  '#642d91',
   'freq-30':  '#2c8ab8',
   'freq-60':  '#5d9a9d',
