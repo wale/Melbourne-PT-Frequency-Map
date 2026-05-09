@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Melbourne PT Frequency Map</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,20 +19,68 @@
     background: #f4f4f0;
     display: flex;
     flex-direction: column;
+    transition: background 0.2s;
   }
- 
+
+  /* ── Dark mode overrides ── */
+  body.dark {
+    background: #0d0d0d;
+  }
+  body.dark .top-bar {
+    background: #141414;
+    border-bottom-color: #2a2a2a;
+  }
+  body.dark .top-bar h1 { color: #e0e0e0; }
+  body.dark .top-bar .subtitle { color: #666; }
+  body.dark .map-container { background: #0d0d0d; }
+  body.dark .map-panel {
+    background: #1c1c1c;
+    border-color: #333;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  body.dark .legend-section-title,
+  body.dark .info-panel .info-section-title { color: #555; }
+  body.dark .legend-label { color: #ccc; }
+  body.dark .legend-row:hover { background: #252525; }
+  body.dark .legend-divider,
+  body.dark .info-panel hr { border-top-color: #2a2a2a; }
+  body.dark .info-panel p { color: #aaa; }
+  body.dark .info-panel a { color: #4a9edd; }
+  body.dark .zoom-btn,
+  body.dark .map-btn {
+    background: #1c1c1c;
+    border-color: #333;
+    color: #ccc;
+  }
+  body.dark .zoom-btn:hover,
+  body.dark .map-btn:hover { background: #252525; }
+  body.dark .zoom-btn { color: #ccc; }
+  body.dark .map-btn svg rect,
+  body.dark .map-btn svg path { stroke: #aaa; fill: #aaa; }
+  body.dark .map-btn svg path { fill: none; }
+
+  /* dark mode legend swatches that reference light colours */
+  body.dark .swatch-interchange { background: #d0d0d0; }
+  body.dark .swatch-interchange::after { background: #1c1c1c; }
+  body.dark .swatch-poi { background: #787878; }
+  body.dark .swatch-hosp { background: #787878; }
+  body.dark .swatch-fwy { background: #2a2a2a; }
+  body.dark .swatch-fwy::after { background: #2a2a2a; color: #888; }
+
   /* ── Top bar ── */
   .top-bar {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0 1rem;
-  height: 52px;
-  border-bottom: 1px solid #ddd;
-  z-index: 30;
-}
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    height: 52px;
+    border-bottom: 1px solid #ddd;
+    z-index: 30;
+    background: #f4f4f0;
+    position: relative;
+    transition: background 0.2s, border-color 0.2s;
+  }
  
   .top-bar h1 {
     font-size: 1.5rem;
@@ -40,13 +89,46 @@
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
+
+  .top-bar-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
  
   .top-bar .subtitle {
     font-size: 1rem;
     color: #999;
     white-space: nowrap;
   }
- 
+
+  /* ── Dark mode toggle button ── */
+  .dark-toggle {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    width: 34px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #555;
+    transition: background 0.12s, border-color 0.2s;
+    z-index: 31;
+  }
+  .dark-toggle:hover { background: #e8e8e8; }
+  body.dark .dark-toggle {
+    border-color: #444;
+    background: #1c1c1c;
+  }
+  body.dark .dark-toggle:hover { background: #252525; }
+
   /* ── Map fills remaining height ── */
   .map-container {
     position: relative;
@@ -55,6 +137,7 @@
     background: #fff;
     overflow: hidden;
     cursor: grab;
+    transition: background 0.2s;
   }
   .map-container.panning { cursor: grabbing; }
  
@@ -64,6 +147,8 @@
     display: block;
     overflow: hidden;
     touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
  
   #map-svg-wrapper svg {
@@ -71,11 +156,6 @@
     height: 100%;
     display: block;
   }
-  
-  #map-svg-wrapper {
-  user-select: none;
-  -webkit-user-select: none;
-}
  
   /* ── Zoom controls ── */
   .zoom-controls {
@@ -133,15 +213,8 @@
   .map-btn .arrow { transition: transform 0.18s; }
   .map-btn.open .arrow { transform: rotate(180deg); }
 
-  /* ── Legend toggle button ── */
-  .legend-btn {
-    top: 10px;
-  }
-
-  /* ── Info toggle button ── */
-  .info-btn {
-    top: 48px; /* sits just below legend button (10px top + 30px height + 8px gap) */
-  }
+  .legend-btn { top: 10px; }
+  .info-btn { top: 48px; }
  
   /* ── Shared panel styles ── */
   .map-panel {
@@ -157,7 +230,7 @@
     opacity: 0;
     pointer-events: none;
     transform: translateY(-6px);
-    transition: opacity 0.18s, transform 0.18s;
+    transition: opacity 0.18s, transform 0.18s, background 0.2s, border-color 0.2s;
   }
   .map-panel.open {
     opacity: 1;
@@ -165,13 +238,8 @@
     transform: translateY(0);
   }
 
-  /* ── Legend panel ── */
-  .legend-panel {
-    top: 44px;
-  }
-
-  /* ── Info panel ── */
-    .info-panel {
+  .legend-panel { top: 44px; }
+  .info-panel {
     top: 82px;
     max-width: 260px;
     max-height: calc(100vh - 120px);
@@ -188,13 +256,7 @@
     margin-top: 4px;
   }
   .info-panel .info-section-title:first-child { margin-top: 0; }
-
-  .info-panel hr {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 8px 0;
-  }
-
+  .info-panel hr { border: none; border-top: 1px solid #eee; margin: 8px 0; }
   .info-panel p {
     font-size: 12px;
     color: #333;
@@ -203,14 +265,10 @@
     margin-bottom: 6px;
   }
   .info-panel p:last-child { margin-bottom: 0; }
-
-  .info-panel a {
-    color: #0070c9;
-    text-decoration: none;
-  }
+  .info-panel a { color: #0070c9; text-decoration: none; }
   .info-panel a:hover { text-decoration: underline; }
 
-  /* ── Legend-specific styles ── */
+  /* ── Legend styles ── */
   .legend-section-title {
     font-size: 10px;
     font-weight: 700;
@@ -221,12 +279,7 @@
     margin-top: 4px;
   }
   .legend-section-title:first-child { margin-top: 0; }
- 
-  .legend-divider {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 8px 0;
-  }
+  .legend-divider { border: none; border-top: 1px solid #eee; margin: 8px 0; }
  
   .legend-row {
     display: flex;
@@ -240,7 +293,6 @@
   }
   .legend-row:hover { background: #f8f8f8; }
   .legend-row.hidden { opacity: 0.35; }
- 
   .legend-row input[type="checkbox"] {
     width: 14px;
     height: 14px;
@@ -249,7 +301,7 @@
     accent-color: #444;
     flex-shrink: 0;
   }
-  
+
   /* ── Shared backdrop ── */
   .map-backdrop {
     display: none;
@@ -257,9 +309,7 @@
     inset: 0;
     z-index: 19;
   }
-  .map-backdrop.open {
-    display: block;
-  }
+  .map-backdrop.open { display: block; }
  
   .swatch-line {
     width: 28px;
@@ -276,11 +326,10 @@
     position: relative;
     display: inline-block;
   }
-
   .swatch-fwy::after {
     content: "M5";
     position: absolute;
-      top: 50%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     background: #dfdfdfff;
@@ -368,36 +417,14 @@
     font-size: 14px;
   }
  
-  /* ── Mobile: panels slide up from bottom ── */
+  /* ── Mobile ── */
   @media (max-width: 768px) {
     .top-bar h1 { font-size: 0.9rem; }
     .top-bar .subtitle { font-size: 0.75rem; }
- 
     .legend-panel, .info-panel {
-      right: 0;
-      left: 0;
-      top: auto;
-      bottom: 0;
-      width: 100%;
-      max-width: 100%;
-      max-height: 55vh;
-      overflow-y: auto;
-      border-radius: 12px 12px 0 0;
-      transform: translateY(100%);
-    }
-    .legend-panel.open, .info-panel.open { transform: translateY(0); }
- 
-    .zoom-controls { bottom: 16px; right: 12px; gap: 6px; }
-    .zoom-btn { width: 38px; height: 38px; font-size: 20px; }
-  }
-  
-  @media (max-width: 768px) {
-    .legend-panel, .info-panel {
-      right: 0;
-      left: 0;
-      top: auto;
-      bottom: 0;
-      width: 100%;
+      right: 0; left: 0;
+      top: auto; bottom: 0;
+      width: 100%; max-width: 100%;
       max-height: 70vh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -405,6 +432,9 @@
       transform: translateY(100%);
       padding-bottom: env(safe-area-inset-bottom, 16px);
     }
+    .legend-panel.open, .info-panel.open { transform: translateY(0); }
+    .zoom-controls { bottom: 16px; right: 12px; gap: 6px; }
+    .zoom-btn { width: 38px; height: 38px; font-size: 20px; }
   }
  
   @media (max-height: 500px) and (orientation: landscape) {
@@ -413,13 +443,15 @@
   }
 </style>
 </head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <body>
  
 <!-- ── Top bar ── -->
 <div class="top-bar">
-  <h1>Melbourne PT Frequency Map </h1>
-  <span class="subtitle"", style = "margin-top:2px;">Train + Tram + Bus - Unofficial - Current as of May 2026 - by Adam Bain</span>
+  <button class="dark-toggle" id="darkToggle" title="Toggle dark mode">☀️</button>
+  <div class="top-bar-center">
+    <h1>Melbourne PT Frequency Map</h1>
+    <span class="subtitle" style="margin-top:2px;">Unofficial - Current as of May 2026 - by Adam Bain</span>
+  </div>
 </div>
  
 <!-- ── Full-screen map ── -->
@@ -428,7 +460,6 @@
     <div class="loading">Loading map…</div>
   </div>
   
-  <!-- Shared backdrop (closes whichever panel is open) -->
   <div class="map-backdrop" id="mapBackdrop"></div>
  
   <!-- Legend toggle -->
@@ -462,41 +493,41 @@
  
   <!-- Legend panel -->
   <div class="map-panel legend-panel" id="legendPanel" role="region" aria-label="Map legend">
-    <p class="legend-section-title">At Midday on a Weekday<br> this Service Runs Every:</p>
+    <p class="legend-section-title">At Midday on a Weekday<br>this Service Runs Every:</p>
  
     <label class="legend-row" data-layers="layer3, layer5, layer60, layer49, layer74, layer67, layer40, layer27, layer80">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#671415"></span>
+      <span class="swatch-line freq-10" style="background:#671415"></span>
       <span class="legend-label">10 min or less</span>
     </label>
     <label class="legend-row" data-layers="layer6, layer73, layer50, layer66, layer79, layer42, layer59, layer24, layer37, layer28">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#a62624"></span>
+      <span class="swatch-line freq-15" style="background:#a62624"></span>
       <span class="legend-label">15 minutes</span>
     </label>
     <label class="legend-row" data-layers="layer7, layer72, layer53, layer65, layer78, layer39, layer58, layer23, layer32">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#642d91"></span>
+      <span class="swatch-line freq-20" style="background:#642d91"></span>
       <span class="legend-label">20 minutes</span>
     </label>
     <label class="legend-row" data-layers="layer8, layer71, layer52, layer64, layer77, layer41, layer57, layer14, layer34,">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#2c8ab8"></span>
+      <span class="swatch-line freq-30" style="background:#2c8ab8"></span>
       <span class="legend-label">30 minutes</span>
     </label>
     <label class="legend-row" data-layers="layer9, layer70, layer51, layer63, layer76, layer43, layer56, layer22, layer31">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#5d9a9d"></span>
+      <span class="swatch-line freq-60" style="background:#5d9a9d"></span>
       <span class="legend-label">40–60 minutes</span>
     </label>
     <label class="legend-row" data-layers="layer10, layer69, layer48, layer62, layer75, layer44, layer55, layer25, layer36, layer29">
       <input type="checkbox" checked>
-      <span class="swatch-line" style="background:#8d6f32"></span>
+      <span class="swatch-line freq-ltd" style="background:#8d6f32"></span>
       <span class="legend-label">Peak Only / Limited Service</span>
     </label>
     <label class="legend-row" data-layers="layer4">
       <input type="checkbox" checked>
-      <span class="swatch-rect" style="background:#fae8ceff"></span>
+      <span class="swatch-rect flexiride-swatch" style="background:#fae8ceff"></span>
       <span class="legend-label">Flexiride</span>
     </label>
  
@@ -504,15 +535,15 @@
     <p class="legend-section-title">Features</p>
  
     <label class="legend-row" data-layers="layer11">
-      <span class="swatch-interchange" style="background:#333"></span>
+      <span class="swatch-interchange"></span>
       <span class="legend-label">Interchanges</span>
     </label>
     <label class="legend-row" data-layers="layer17">
-      <span class="swatch-poi" style="background:#7a7a7a"></span>
+      <span class="swatch-poi"></span>
       <span class="legend-label">Points of interest</span>
     </label>
     <label class="legend-row" data-layers="layer17">
-      <span class="swatch-hosp" style="background:#7a7a7a"></span>
+      <span class="swatch-hosp"></span>
       <span class="legend-label">Hospital</span>
     </label>
     <label class="legend-row" data-layers="layer18,layer20,layer1">
@@ -533,16 +564,13 @@
   <div class="map-panel info-panel" id="infoPanel" role="region" aria-label="Map information">
     <p class="info-section-title">About</p>
     <p>This map shows public transport frequency across metropolitan Melbourne at midday on a typical weekday. Routes are colour-coded by how often they run, irrespective of mode.</p>
-
     <hr>
     <p class="info-section-title">Rationale</p>
     <p>Existing local area maps largely fail to distinguish frequent routes from infrequent ones. Inspired by the <a href="https://seattletransitblog.com/2016/01/07/the-seattle-transit-map-and-guide/" target="_blank" rel="noopener">Seattle Transit Map</a> and the Miami Metrobus Map, this map uses colour and line weight to represent frequency, stripping out much of the visual noise.</p>
     <p>The background is intentionally simplified — this is a friendly overview of the network, not a navigation tool. Trip planning apps are better suited for end-to-end journey planning.</p>
-
     <hr>
     <p class="info-section-title">Data &amp; methodology</p>
     <p>Frequency is based on timetables current as of May 2026, assessed across a midday window of approximately 11:00–13:00 on a weekday. Flexiride zones operate as on-demand services and are shown as shaded areas rather than fixed routes.</p>
-
     <hr>
     <p class="info-section-title">Notes</p>
     <p>Unofficial — not affiliated with PTV or the Victorian Government. Check <a href="https://transport.vic.gov.au/" target="_blank" rel="noopener">transport.vic.gov.au</a> for current timetables.</p>
@@ -559,48 +587,112 @@
 </div>
  
 <script>
-(async () => {
+// ── Dark mode toggle ──
+const LIGHT_SVG = 'recent_map.svg';
+const DARK_SVG  = 'dark_map.svg';
+
+// Legend swatch colours per mode
+const SWATCH_LIGHT = {
+  'freq-10':  '#671415',
+  'freq-15':  '#a62624',
+  'freq-20':  '#642d91',
+  'freq-30':  '#2c8ab8',
+  'freq-60':  '#5d9a9d',
+  'freq-ltd': '#8d6f32',
+  'flexiride-swatch': '#fae8ceff'
+};
+const SWATCH_DARK = {
+  'freq-10':  '#ffffff',
+  'freq-15':  '#f5e020',
+  'freq-20':  '#90d743',
+  'freq-30':  '#27c284',
+  'freq-30':  '#3a86c8',
+  'freq-60':  '#9040c0 ',
+  'freq-ltd': '#8b5e3c',
+  'flexiride-swatch': '#4e2310'
+};
+
+
+let isDark = false;
+
+document.getElementById('darkToggle').addEventListener('click', () => {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('darkToggle').textContent = isDark ? '🌙' : '☀️';
+
+  // Update legend swatches
+  const swatchMap = isDark ? SWATCH_DARK : SWATCH_LIGHT;
+  Object.entries(swatchMap).forEach(([cls, colour]) => {
+    document.querySelectorAll('.' + cls).forEach(el => {
+      el.style.background = colour;
+    });
+  });
+
+  // Swap SVG — preserve current viewBox so zoom/pan position is kept
+  loadSVG(isDark ? DARK_SVG : LIGHT_SVG, currentViewBox());
+});
+
+// ── SVG loading ──
+let svgEl = null;
+
+function currentViewBox() {
+  return svgEl ? svgEl.getAttribute('viewBox') : null;
+}
+
+async function loadSVG(src, preserveViewBox) {
   const wrapper = document.getElementById('map-svg-wrapper');
   try {
-    const res = await fetch('recent_map.svg');
+    const res = await fetch(src);
     const text = await res.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'image/svg+xml');
     const svg = doc.querySelector('svg');
- 
+
     svg.removeAttribute('width');
     svg.removeAttribute('height');
-    svg.style.width = '100%';
+    svg.style.width  = '100%';
     svg.style.height = '100%';
     svg.style.display = 'block';
- 
+
     wrapper.innerHTML = '';
     wrapper.appendChild(svg);
-    initZoom(svg);
+    svgEl = svg;
+    initZoom(svg, preserveViewBox);
   } catch (e) {
-    wrapper.innerHTML = '<p style="padding:2rem;text-align:center;color:#888;font-size:13px;">Could not load <code>recent_map.svg</code> — make sure it is in the same folder.</p>';
+    wrapper.innerHTML = '<p style="padding:2rem;text-align:center;color:#888;font-size:13px;">Could not load <code>' + src + '</code> — make sure it is in the same folder.</p>';
   }
-  
+}
+
+// Initial load
+(async () => {
+  await loadSVG(LIGHT_SVG, null);
 })();
- 
-function initZoom(svg) {
+
+function initZoom(svg, preserveViewBox) {
   const container = document.querySelector('.map-container');
   const wrapper   = document.getElementById('map-svg-wrapper');
  
   const vbParts = svg.getAttribute('viewBox').split(/[\s,]+/).map(Number);
   const origVB = { x: vbParts[0], y: vbParts[1], w: vbParts[2], h: vbParts[3] };
   let vb = { ...origVB };
-  
-  const initialScale = 2;
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    vb.w = origVB.w / initialScale;
-    vb.h = origVB.h / initialScale;
-    vb.x = origVB.x + (origVB.w - vb.w) / 2;
-    vb.y = origVB.y + (origVB.h - vb.h) / 2;
+
+  // Restore previous pan/zoom if swapping SVGs, otherwise start at 2x zoom
+  if (preserveViewBox) {
+    const parts = preserveViewBox.split(/[\s,]+/).map(Number);
+    vb = { x: parts[0], y: parts[1], w: parts[2], h: parts[3] };
     setViewBox();
-  });
-});
+  } else {
+    const initialScale = 2;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        vb.w = origVB.w / initialScale;
+        vb.h = origVB.h / initialScale;
+        vb.x = origVB.x + (origVB.w - vb.w) / 2;
+        vb.y = origVB.y + (origVB.h - vb.h) / 2;
+        setViewBox();
+      });
+    });
+  }
 
   const MIN_SCALE = 1, MAX_SCALE = 12, ZOOM_STEP = 1.35;
  
@@ -638,18 +730,18 @@ requestAnimationFrame(() => {
     vb.y = Math.min(origVB.y + origVB.h - vb.h, Math.max(origVB.y, vb.y));
   }
  
-  document.getElementById('zoomIn').addEventListener('click', () => {
+  document.getElementById('zoomIn').onclick = () => {
     const r = wrapper.getBoundingClientRect();
     zoomAt(r.width / 2, r.height / 2, ZOOM_STEP);
-  });
-  document.getElementById('zoomOut').addEventListener('click', () => {
+  };
+  document.getElementById('zoomOut').onclick = () => {
     const r = wrapper.getBoundingClientRect();
     zoomAt(r.width / 2, r.height / 2, 1 / ZOOM_STEP);
-  });
-  document.getElementById('zoomReset').addEventListener('click', () => {
+  };
+  document.getElementById('zoomReset').onclick = () => {
     vb = { ...origVB };
     setViewBox();
-  });
+  };
  
   wrapper.addEventListener('wheel', e => {
     e.preventDefault();
@@ -660,7 +752,7 @@ requestAnimationFrame(() => {
   let dragging = false, dragStartPt = null, dragStartVB = null;
  
   wrapper.addEventListener('mousedown', e => {
-  e.preventDefault();
+    e.preventDefault();
     if (currentScale() <= MIN_SCALE) return;
     dragging = true;
     const r = wrapper.getBoundingClientRect();
@@ -686,12 +778,12 @@ requestAnimationFrame(() => {
   let lastTouches = null;
  
   wrapper.addEventListener('touchstart', e => {
-  if (e.touches.length > 1) e.preventDefault();
-  lastTouches = Array.from(e.touches).map(t => ({
-    x: t.clientX - wrapper.getBoundingClientRect().left,
-    y: t.clientY - wrapper.getBoundingClientRect().top,
-  }));
-}, { passive: false });
+    if (e.touches.length > 1) e.preventDefault();
+    lastTouches = Array.from(e.touches).map(t => ({
+      x: t.clientX - wrapper.getBoundingClientRect().left,
+      y: t.clientY - wrapper.getBoundingClientRect().top,
+    }));
+  }, { passive: false });
  
   wrapper.addEventListener('touchmove', e => {
     e.preventDefault();
@@ -700,7 +792,6 @@ requestAnimationFrame(() => {
       x: t.clientX - r.left,
       y: t.clientY - r.top,
     }));
- 
     if (touches.length === 2 && lastTouches && lastTouches.length === 2) {
       const prev = lastTouches, cur = touches;
       const prevDist = Math.hypot(prev[1].x - prev[0].x, prev[1].y - prev[0].y);
@@ -749,9 +840,8 @@ requestAnimationFrame(() => {
   }, { passive: false });
 }
 
-// ── Panel toggle logic (shared for legend + info) ──
+// ── Panel toggle logic ──
 const backdrop = document.getElementById('mapBackdrop');
-
 const panels = [
   { btn: document.getElementById('legendBtn'), panel: document.getElementById('legendPanel') },
   { btn: document.getElementById('infoBtn'),   panel: document.getElementById('infoPanel')   },
@@ -787,11 +877,10 @@ document.addEventListener('click', e => {
   }
 });
  
-// Layer toggles
+// ── Layer toggles ──
 document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
   const checkbox = row.querySelector('input[type="checkbox"]');
   if (!checkbox) return;
- 
   const toggle = () => {
     const layerIds = row.dataset.layers.split(',');
     const hidden = !checkbox.checked;
@@ -801,7 +890,6 @@ document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
       if (layer) layer.style.display = hidden ? 'none' : '';
     });
   };
- 
   checkbox.addEventListener('change', toggle);
   row.addEventListener('click', e => {
     if (e.target === checkbox) return;
