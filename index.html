@@ -107,11 +107,10 @@
   }
   .zoom-btn:hover { background: #f0f0f0; }
   .zoom-btn.zoom-reset { font-size: 11px; font-weight: 600; letter-spacing: -0.03em; }
- 
-  /* ── Legend toggle button ── */
-  .legend-btn {
+
+  /* ── Shared top-right button styles ── */
+  .map-btn {
     position: absolute;
-    top: 10px;
     right: 10px;
     background: #fff;
     border: 1px solid #bbb;
@@ -129,15 +128,24 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
     transition: background 0.12s;
   }
-  .legend-btn:hover { background: #f5f5f5; }
-  .legend-btn svg { flex-shrink: 0; }
-  .legend-btn .arrow { transition: transform 0.18s; }
-  .legend-btn.open .arrow { transform: rotate(180deg); }
+  .map-btn:hover { background: #f5f5f5; }
+  .map-btn svg { flex-shrink: 0; }
+  .map-btn .arrow { transition: transform 0.18s; }
+  .map-btn.open .arrow { transform: rotate(180deg); }
+
+  /* ── Legend toggle button ── */
+  .legend-btn {
+    top: 10px;
+  }
+
+  /* ── Info toggle button ── */
+  .info-btn {
+    top: 48px; /* sits just below legend button (10px top + 30px height + 8px gap) */
+  }
  
-  /* ── Legend dropdown panel ── */
-  .legend-panel {
+  /* ── Shared panel styles ── */
+  .map-panel {
     position: absolute;
-    top: 44px;
     right: 10px;
     background: #fff;
     border: 1px solid #ccc;
@@ -151,12 +159,58 @@
     transform: translateY(-6px);
     transition: opacity 0.18s, transform 0.18s;
   }
-  .legend-panel.open {
+  .map-panel.open {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
   }
- 
+
+  /* ── Legend panel ── */
+  .legend-panel {
+    top: 44px;
+  }
+
+  /* ── Info panel ── */
+    .info-panel {
+    top: 82px;
+    max-width: 260px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+
+  .info-panel .info-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #888;
+    margin-bottom: 8px;
+    margin-top: 4px;
+  }
+  .info-panel .info-section-title:first-child { margin-top: 0; }
+
+  .info-panel hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 8px 0;
+  }
+
+  .info-panel p {
+    font-size: 12px;
+    color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.55;
+    margin-bottom: 6px;
+  }
+  .info-panel p:last-child { margin-bottom: 0; }
+
+  .info-panel a {
+    color: #0070c9;
+    text-decoration: none;
+  }
+  .info-panel a:hover { text-decoration: underline; }
+
+  /* ── Legend-specific styles ── */
   .legend-section-title {
     font-size: 10px;
     font-weight: 700;
@@ -196,15 +250,16 @@
     flex-shrink: 0;
   }
   
-  .legend-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 19;
-}
-.legend-backdrop.open {
-  display: block;
-}
+  /* ── Shared backdrop ── */
+  .map-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 19;
+  }
+  .map-backdrop.open {
+    display: block;
+  }
  
   .swatch-line {
     width: 28px;
@@ -313,46 +368,47 @@
     font-size: 14px;
   }
  
-  /* ── Mobile: legend slides up from bottom ── */
+  /* ── Mobile: panels slide up from bottom ── */
   @media (max-width: 768px) {
     .top-bar h1 { font-size: 0.9rem; }
     .top-bar .subtitle { font-size: 0.75rem; }
  
-    .legend-panel {
+    .legend-panel, .info-panel {
       right: 0;
       left: 0;
       top: auto;
       bottom: 0;
       width: 100%;
+      max-width: 100%;
       max-height: 55vh;
       overflow-y: auto;
       border-radius: 12px 12px 0 0;
       transform: translateY(100%);
     }
-    .legend-panel.open { transform: translateY(0); }
+    .legend-panel.open, .info-panel.open { transform: translateY(0); }
  
     .zoom-controls { bottom: 16px; right: 12px; gap: 6px; }
     .zoom-btn { width: 38px; height: 38px; font-size: 20px; }
   }
   
   @media (max-width: 768px) {
-  .legend-panel {
-    right: 0;
-    left: 0;
-    top: auto;
-    bottom: 0;
-    width: 100%;
-    max-height: 70vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 12px 12px 0 0;
-    transform: translateY(100%);
-    padding-bottom: env(safe-area-inset-bottom, 16px);
+    .legend-panel, .info-panel {
+      right: 0;
+      left: 0;
+      top: auto;
+      bottom: 0;
+      width: 100%;
+      max-height: 70vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 12px 12px 0 0;
+      transform: translateY(100%);
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
   }
-}
  
   @media (max-height: 500px) and (orientation: landscape) {
-    .legend-panel { max-height: 70vh; }
+    .legend-panel, .info-panel { max-height: 70vh; }
     .zoom-controls { bottom: 8px; }
   }
 </style>
@@ -362,8 +418,8 @@
  
 <!-- ── Top bar ── -->
 <div class="top-bar">
-  <h1>Melbourne PT Frequency Map</h1>
-  <span class="subtitle"", style = "margin-top:2px;">Unofficial - Current as of May 2026 - by Adam Bain</span>
+  <h1>Melbourne PT Frequency Map </h1>
+  <span class="subtitle"", style = "margin-top:2px;">Train + Tram + Bus - Unofficial - Current as of May 2026 - by Adam Bain</span>
 </div>
  
 <!-- ── Full-screen map ── -->
@@ -372,10 +428,11 @@
     <div class="loading">Loading map…</div>
   </div>
   
-    <div class="legend-backdrop" id="legendBackdrop"></div>
+  <!-- Shared backdrop (closes whichever panel is open) -->
+  <div class="map-backdrop" id="mapBackdrop"></div>
  
   <!-- Legend toggle -->
-  <button class="legend-btn" id="legendBtn" aria-expanded="false" aria-controls="legendPanel">
+  <button class="map-btn legend-btn" id="legendBtn" aria-expanded="false" aria-controls="legendPanel">
     <svg width="13" height="11" viewBox="0 0 13 11" fill="none">
       <rect x="0" y="0" width="7" height="2" rx="1" fill="#555"/>
       <rect x="9" y="0" width="4" height="2" rx="1" fill="#555"/>
@@ -389,9 +446,22 @@
       <path d="M1 1L5 5.5L9 1" stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
+
+  <!-- Info toggle -->
+  <button class="map-btn info-btn" id="infoBtn" aria-expanded="false" aria-controls="infoPanel">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <circle cx="6.5" cy="6.5" r="5.5" stroke="#555" stroke-width="1.4"/>
+      <rect x="6" y="5.5" width="1.1" height="4" rx="0.55" fill="#555"/>
+      <rect x="6" y="3.5" width="1.1" height="1.1" rx="0.55" fill="#555"/>
+    </svg>
+    Info
+    <svg class="arrow" width="10" height="7" viewBox="0 0 10 7" fill="none">
+      <path d="M1 1L5 5.5L9 1" stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
  
   <!-- Legend panel -->
-  <div class="legend-panel" id="legendPanel" role="region" aria-label="Map legend">
+  <div class="map-panel legend-panel" id="legendPanel" role="region" aria-label="Map legend">
     <p class="legend-section-title">At Midday on a Weekday<br> this Service Runs Every:</p>
  
     <label class="legend-row" data-layers="layer3, layer5, layer60, layer49, layer74, layer67, layer40, layer27, layer80">
@@ -457,6 +527,27 @@
       <span class="swatch-rect" style="background:#b5effb; border: 1px solid #7dc8d8;"></span>
       <span class="legend-label">Lakes &amp; waterways</span>
     </label>
+  </div>
+
+  <!-- Info panel -->
+  <div class="map-panel info-panel" id="infoPanel" role="region" aria-label="Map information">
+    <p class="info-section-title">About</p>
+    <p>This map shows public transport frequency across metropolitan Melbourne at midday on a typical weekday. Routes are colour-coded by how often they run, irrespective of mode.</p>
+
+    <hr>
+    <p class="info-section-title">Rationale</p>
+    <p>Existing local area maps largely fail to distinguish frequent routes from infrequent ones. Inspired by the <a href="https://seattletransitblog.com/2016/01/07/the-seattle-transit-map-and-guide/" target="_blank" rel="noopener">Seattle Transit Map</a> and the Miami Metrobus Map, this map uses colour and line weight to represent frequency, stripping out much of the visual noise.</p>
+    <p>The background is intentionally simplified — this is a friendly overview of the network, not a navigation tool. Trip planning apps are better suited for end-to-end journey planning.</p>
+
+    <hr>
+    <p class="info-section-title">Data &amp; methodology</p>
+    <p>Frequency is based on timetables current as of May 2026, assessed across a midday window of approximately 11:00–13:00 on a weekday. Flexiride zones operate as on-demand services and are shown as shaded areas rather than fixed routes.</p>
+
+    <hr>
+    <p class="info-section-title">Notes</p>
+    <p>Unofficial — not affiliated with PTV or the Victorian Government. Check <a href="https://transport.vic.gov.au/" target="_blank" rel="noopener">transport.vic.gov.au</a> for current timetables.</p>
+    <p>Created by Adam Bain, May 2026. Contact: <a href="mailto:adambain014@gmail.com">adambain014@gmail.com</a></p>
+    <p><a href="https://github.com/adambain014/Melbourne-PT-Frequency-Map/issues" target="_blank" rel="noopener">Report an issue on GitHub ↗</a></p>
   </div>
  
   <!-- Zoom controls -->
@@ -657,35 +748,43 @@ requestAnimationFrame(() => {
     lastTouches = null;
   }, { passive: false });
 }
- 
-// Legend toggle
-const btn      = document.getElementById('legendBtn');
-const panel    = document.getElementById('legendPanel');
-const backdrop = document.getElementById('legendBackdrop');
 
-function openLegend() {
-  panel.classList.add('open');
-  backdrop.classList.add('open');
-  btn.classList.add('open');
-  btn.setAttribute('aria-expanded', true);
-}
+// ── Panel toggle logic (shared for legend + info) ──
+const backdrop = document.getElementById('mapBackdrop');
 
-function closeLegend() {
-  panel.classList.remove('open');
+const panels = [
+  { btn: document.getElementById('legendBtn'), panel: document.getElementById('legendPanel') },
+  { btn: document.getElementById('infoBtn'),   panel: document.getElementById('infoPanel')   },
+];
+
+function closeAll() {
+  panels.forEach(({ btn, panel }) => {
+    panel.classList.remove('open');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded', false);
+  });
   backdrop.classList.remove('open');
-  btn.classList.remove('open');
-  btn.setAttribute('aria-expanded', false);
 }
 
-btn.addEventListener('click', e => {
-  e.stopPropagation();
-  panel.classList.contains('open') ? closeLegend() : openLegend();
+panels.forEach(({ btn, panel }) => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = panel.classList.contains('open');
+    closeAll();
+    if (!isOpen) {
+      panel.classList.add('open');
+      btn.classList.add('open');
+      btn.setAttribute('aria-expanded', true);
+      backdrop.classList.add('open');
+    }
+  });
 });
 
-backdrop.addEventListener('click', closeLegend);
-
+backdrop.addEventListener('click', closeAll);
 document.addEventListener('click', e => {
-  if (!btn.contains(e.target) && !panel.contains(e.target)) closeLegend();
+  if (!panels.some(({ btn, panel }) => btn.contains(e.target) || panel.contains(e.target))) {
+    closeAll();
+  }
 });
  
 // Layer toggles
@@ -713,4 +812,3 @@ document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
 </script>
 </body>
 </html>
-
