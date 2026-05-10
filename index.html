@@ -74,13 +74,14 @@
   body.dark .map-btn svg path { stroke: #aaa; fill: #aaa; }
   body.dark .map-btn svg path { fill: none; }
 
-  /* dark mode legend swatches that reference light colours */
+  /* dark mode legend swatches */
   body.dark .swatch-interchange { background: #d0d0d0; }
   body.dark .swatch-interchange::after { background: #1c1c1c; }
-  body.dark .swatch-poi { background: #787878; }
-  body.dark .swatch-hosp { background: #787878; }
+  body.dark .swatch-poi { background: #999999; }
+  body.dark .swatch-hosp { background: #999999; }
   body.dark .swatch-fwy { background: #2a2a2a; }
   body.dark .swatch-fwy::after { background: #2a2a2a; color: #888; }
+  body.dark .parks-swatch { background: #1f4a23 !important; border-color: #2d6b30 !important; }
 
   /* ── Top bar ── */
   .top-bar {
@@ -566,7 +567,7 @@
       <span class="legend-label">Freeway</span>
     </label>
     <label class="legend-row" data-layers="layer16">
-      <span class="swatch-rect" style="background:#b9d3b5; border: 1px solid #8faa8b;"></span>
+      <span class="swatch-rect parks-swatch" style="background:#b9d3b5; border: 1px solid #8faa8b;"></span>
       <span class="legend-label">Parks</span>
     </label>
     <label class="legend-row" data-layers="layer21">
@@ -604,12 +605,12 @@
 <script>
 // ── Dark mode toggle ──
 const LIGHT_SVG = 'recent_map.svg';
-const DARK_SVG  = 'dark_map.svg';
+const DARK_SVG  = 'dark_map_small.svg';
 
 // Legend swatch colours per mode
 const SWATCH_LIGHT = {
   'freq-10':  '#671415',
-  'freq-15':  '#a62624',  // match the inline style in your HTML
+  'freq-15':  '#a62624',
   'freq-20':  '#642d91',
   'freq-30':  '#2c8ab8',
   'freq-60':  '#5d9a9d',
@@ -619,12 +620,12 @@ const SWATCH_LIGHT = {
 
 const SWATCH_DARK = {
   'freq-10':  '#ffffff',
-  'freq-15':  '#f5e020',
-  'freq-20':  '#90d743',
-  'freq-30':  '#3a86c8',  // removed duplicate, kept one value
-  'freq-60':  '#9040c0',
-  'freq-ltd': '#8b5e3c',
-  'flexiride-swatch': '#4e2310'
+  'freq-15':  '#FFE030',
+  'freq-20':  '#20d090',
+  'freq-30':  '#3d9ae8',
+  'freq-60':  '#a44ed4',
+  'freq-ltd': '#c07830',
+  'flexiride-swatch': '#291A10'
 };
 
 
@@ -728,7 +729,7 @@ function initZoom(svg, preserveViewBox) {
     });
   }
 
-  const MIN_SCALE = 1, MAX_SCALE = 12, ZOOM_STEP = 1.35;
+  const MIN_SCALE = 1, MAX_SCALE = 13, ZOOM_STEP = 1.35;
  
   function setViewBox() {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
