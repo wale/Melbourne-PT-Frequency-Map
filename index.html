@@ -6,7 +6,7 @@
   
   <!-- Open Graph (Discord, Facebook, Reddit) -->
 <meta property="og:title" content="Melbourne PT Frequency Map">
-<meta property="og:description" content="See how often trams, trains and buses run across Melbourne at midday on a weekday — colour-coded by frequency.">
+<meta property="og:description" content="See how often trams, trains and buses run across Melbourne at midday on a weekday - colour-coded by frequency.">
 <meta property="og:image" content="https://adambain014.github.io/Melbourne-PT-Frequency-Map/preview.png">
 <meta property="og:url" content="https://adambain014.github.io/Melbourne-PT-Frequency-Map/">
 <meta property="og:type" content="website">
@@ -14,7 +14,7 @@
 <!-- Twitter/X card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Melbourne PT Frequency Map">
-<meta name="twitter:description" content="See how often trams, trains and buses run across Melbourne at midday on a weekday — colour-coded by frequency.">
+<meta name="twitter:description" content="See how often trams, trains and buses run across Melbourne at midday on a weekday - colour-coded by frequency.">
 <meta name="twitter:image" content="https://adambain014.github.io/Melbourne-PT-Frequency-Map/preview.png">
 
 
@@ -609,20 +609,20 @@ const DARK_SVG  = 'dark_map.svg';
 // Legend swatch colours per mode
 const SWATCH_LIGHT = {
   'freq-10':  '#671415',
-  'freq-15':  '#FFF059',
+  'freq-15':  '#a62624',  // match the inline style in your HTML
   'freq-20':  '#642d91',
   'freq-30':  '#2c8ab8',
   'freq-60':  '#5d9a9d',
   'freq-ltd': '#8d6f32',
-  'flexiride-swatch': '#fae8ceff'
+  'flexiride-swatch': '#fae8ce'
 };
+
 const SWATCH_DARK = {
   'freq-10':  '#ffffff',
   'freq-15':  '#f5e020',
   'freq-20':  '#90d743',
-  'freq-30':  '#27c284',
-  'freq-30':  '#3a86c8',
-  'freq-60':  '#9040c0 ',
+  'freq-30':  '#3a86c8',  // removed duplicate, kept one value
+  'freq-60':  '#9040c0',
   'freq-ltd': '#8b5e3c',
   'flexiride-swatch': '#4e2310'
 };
@@ -656,6 +656,18 @@ function currentViewBox() {
 
 async function loadSVG(src, preserveViewBox) {
   const wrapper = document.getElementById('map-svg-wrapper');
+
+  // ── Capture hidden layers before swap ──
+  const hiddenLayers = new Set();
+  if (svgEl) {
+    document.querySelectorAll('.legend-row[data-layers]').forEach(row => {
+      const cb = row.querySelector('input[type="checkbox"]');
+      if (cb && !cb.checked) {
+        row.dataset.layers.split(',').forEach(id => hiddenLayers.add(id.trim()));
+      }
+    });
+  }
+
   try {
     const res = await fetch(src);
     const text = await res.text();
@@ -672,6 +684,13 @@ async function loadSVG(src, preserveViewBox) {
     wrapper.innerHTML = '';
     wrapper.appendChild(svg);
     svgEl = svg;
+
+    // ── Reapply hidden layers after swap ──
+    hiddenLayers.forEach(id => {
+      const layer = svg.getElementById(id);
+      if (layer) layer.style.display = 'none';
+    });
+
     initZoom(svg, preserveViewBox);
   } catch (e) {
     wrapper.innerHTML = '<p style="padding:2rem;text-align:center;color:#888;font-size:13px;">Could not load <code>' + src + '</code> — make sure it is in the same folder.</p>';
