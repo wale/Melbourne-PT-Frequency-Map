@@ -390,20 +390,34 @@ panels.forEach(({ btn, panel }) => {
       panel.classList.add("open");
       btn.classList.add("open");
       btn.setAttribute("aria-expanded", true);
-      backdrop.classList.add("open");
     }
   });
 });
 
-backdrop.addEventListener("click", closeAll);
-document.addEventListener("click", (e) => {
+let mouseMove = false;
+document.addEventListener("mousedown", function (e) {
+  mouseMove = false; // Reset mouseMove on each mousedown
+});
+document.addEventListener("mousemove", function (e) {
+  mouseMove = true;
+});
+
+document.addEventListener("mouseup", (e) => {
   if (
     !panels.some(
       ({ btn, panel }) => btn.contains(e.target) || panel.contains(e.target),
     )
   ) {
+    // If mouse moved, don't close panels (user was dragging, not clicking)
+    if (mouseMove) {
+      mouseMove = false;
+      return;
+    }
     closeAll();
   }
+});
+panels.forEach(({ panel }) => {
+  panel.addEventListener("click", (e) => e.stopPropagation());
 });
 
 // ── Layer toggles ──
