@@ -152,7 +152,7 @@ function initZoom(svg, preserveViewBox) {
   }
 
   const MIN_SCALE = 1,
-    MAX_SCALE = 13,
+    MAX_SCALE = 16,
     ZOOM_STEP = 1.35;
 
   function setViewBox() {
