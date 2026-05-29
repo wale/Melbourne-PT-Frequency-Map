@@ -1,0 +1,3 @@
+[submodule "FrequencyFinder"]
+	path = FrequencyFinder
+	url = https://github.com/adambain014/FrequencyFinder
