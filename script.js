@@ -221,6 +221,7 @@ function initZoom(svg, preserveViewBox) {
     { passive: false },
   );
 
+
   let dragging = false,
     dragStartPt = null,
     dragStartVB = null;
