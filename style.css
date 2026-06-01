@@ -18,23 +18,12 @@
   body.dark {
     background: #0d0d0d;
   }
-  body.dark #map-svg-wrapper {
-  background: #1F1F1F;
-}
   body.dark .top-bar {
-    background: #141414;
-    border-bottom-color: #2a2a2a;
-  }
-  body.dark .sub-bar {
     background: #141414;
     border-bottom-color: #2a2a2a;
   }
   body.dark .top-bar h1 { color: #e0e0e0; }
   body.dark .top-bar .subtitle { color: #666; }
-  body.dark .sub-bar a { color: #666; }
-  body.dark .sub-bar a:hover {
-    color: #3d9ae8;
-  }
   body.dark .map-container { background: #0d0d0d; }
   body.dark .map-panel {
     background: #1c1c1c;
@@ -110,6 +99,7 @@
     text-align: center;
     padding: 5px 12px;
     font-size: 1rem;
+    white-space: nowrap;
   }
   
   .sub-bar a {
