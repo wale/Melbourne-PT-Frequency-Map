@@ -13,7 +13,7 @@
     flex-direction: column;
     transition: background 0.2s;
   }
-
+ 
   /* ── Dark mode overrides ── */
   body.dark {
     background: #0d0d0d;
@@ -59,6 +59,19 @@
   body.dark .swatch-fwy { background: #2a2a2a; }
   body.dark .swatch-fwy::after { background: #2a2a2a; color: #888; }
   body.dark .parks-swatch { background: #1f4a23 !important; border-color: #2d6b30 !important; }
+  body.dark .sub-bar {
+  background: #141414;
+}
+
+body.dark .sub-bar a {
+  color: #666;
+}
+
+.top-bar, .sub-bar, .map-container, .map-panel, .zoom-btn, .map-btn, .dark-toggle,
+.legend-label, .legend-section-title, .info-section-title, .legend-divider,
+.info-panel p, .info-panel a, .info-panel hr {
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
 
   /* ── Top bar ── */
   .top-bar {
@@ -425,6 +438,69 @@
     color: #888;
     font-size: 14px;
   }
+
+  .teleport-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+  .teleport-modal.open {
+    display: flex;
+  }
+  .teleport-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    text-align: center;
+    min-width: 220px;
+  }
+  body.dark .teleport-box {
+    background: #1c1c1c;
+    color: #ccc;
+  }
+  .teleport-box p {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 16px;
+    color: #222;
+  }
+  body.dark .teleport-box p { color: #ccc; }
+  .teleport-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .teleport-btns button {
+    padding: 7px 22px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    font-size: 13px;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .teleport-btns button:first-child {
+    background: #2c8ab8;
+    color: #fff;
+    border-color: #2c8ab8;
+  }
+  .teleport-btns button:first-child:hover { background: #236e94; }
+  .teleport-btns button:last-child {
+    background: #fff;
+    color: #333;
+  }
+  body.dark .teleport-btns button:last-child {
+    background: #2a2a2a;
+    color: #ccc;
+    border-color: #444;
+  }
+  .teleport-btns button:last-child:hover { background: #f0f0f0; }
+  body.dark .teleport-btns button:last-child:hover { background: #333; }
  
   /* ── Mobile ── */
   @media (max-width: 768px) {
