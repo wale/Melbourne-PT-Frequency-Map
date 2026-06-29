@@ -24,6 +24,9 @@
 <title>Melbourne PT Frequency Map</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
+
+
 <body>
  
 <!-- ── Top bar ── -->
@@ -96,7 +99,7 @@
       <span class="swatch-line freq-20" style="background:#642d91"></span>
       <span class="legend-label">20 minutes</span>
     </label>
-    <label class="legend-row" data-layers="layer8, layer71, layer52, layer64, layer77, layer41, layer57, layer14, layer34,">
+    <label class="legend-row" data-layers="layer8, layer71, layer52, layer64, layer77, layer41, layer57, layer14, layer34, layer107">
       <input type="checkbox" checked>
       <span class="swatch-line freq-30" style="background:#2c8ab8"></span>
       <span class="legend-label">30 minutes</span>
@@ -171,6 +174,18 @@
     <button class="zoom-btn zoom-reset" id="zoomReset" title="Reset zoom">MAX</button>
   </div>
 </div>
+
+<div class="teleport-modal" id="teleportModal">
+  <div class="teleport-box">
+    <p>Go to Melbourne CBD?</p>
+    <div class="teleport-btns">
+      <button id="teleportYes">Yes</button>
+      <button id="teleportNo">No</button>
+    </div>
+  </div>
+</div>
+
+
 <script src="script.js"></script>
 </body>
 </html>
