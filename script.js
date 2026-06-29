@@ -140,15 +140,13 @@ function initZoom(svg, preserveViewBox) {
     setViewBox();
   } else {
     const initialScale = 2;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        vb.w = origVB.w / initialScale;
-        vb.h = origVB.h / initialScale;
-        vb.x = origVB.x + (origVB.w - vb.w) / 2;
-        vb.y = origVB.y + (origVB.h - vb.h) / 2;
-        setViewBox();
-      });
-    });
+
+    vb.w = origVB.w / initialScale;
+    vb.h = origVB.h / initialScale;
+    vb.x = origVB.x + (origVB.w - vb.w) / 2;
+    vb.y = origVB.y + (origVB.h - vb.h) / 2 - 250;
+    setViewBox();
+
   }
 
   const MIN_SCALE = 1,
@@ -358,6 +356,29 @@ function initZoom(svg, preserveViewBox) {
     },
     { passive: false },
   );
+  const teleportEl = svg.getElementById("path3295");
+  if (teleportEl) {
+    teleportEl.style.cursor = "pointer";
+    teleportEl.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      const modal = document.getElementById("teleportModal");
+      modal.classList.add("open");
+
+      document.getElementById("teleportYes").onclick = () => {
+        modal.classList.remove("open");
+        vb.x = 100; 
+        vb.y = 1200;  
+        vb.w = origVB.w / 3.6;
+        vb.h = origVB.h / 3.6;
+        clamp();
+        setViewBox();
+      };
+      document.getElementById("teleportNo").onclick = () => {
+        modal.classList.remove("open");
+      };
+    });
+  }
+
 }
 
 // ── Panel toggle logic ──
